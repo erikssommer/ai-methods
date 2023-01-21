@@ -28,6 +28,9 @@ def task1():
 
 
 def same_birthday(n):
+    """ 
+    Function that takes N and computes the probability of the event via simulation
+    """
     # The number of times the event occurs
     same_birthday = 0
     iterations = 10000
