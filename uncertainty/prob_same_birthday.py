@@ -8,13 +8,18 @@ def task1():
     prob_min_50 = 0
     min_n = None
 
+    # Iterate over the values of n
     for n in n_values:
+        # Calculate the probability of the event occurring
         prob = same_birthday(n)
+        # Check if the probability is greater than 50%
         if prob >= 0.5:
             prob_min_50 = prob
+            # Check if the value of n is smaller than the current value then update the value
             if not min_n:
                 min_n = n
 
+    # Calculate the proportion of N where the event happens with the least 50% chance
     proportion = prob_min_50 / len(n_values)
 
     # Print the results
@@ -23,15 +28,20 @@ def task1():
 
 
 def same_birthday(n):
+    # The number of times the event occurs
     same_birthday = 0
     iterations = 10000
 
+    # Simulate over the number of iterations
     for _ in range(iterations):
         birthdays = []
+        # Generate a random birthday for each person
         for _ in range(n):
             birthdays.append(random.randint(1, 365))
+        # Check if there are any duplicate birthdays
         if len(birthdays) != len(set(birthdays)):
             same_birthday += 1
+    # Return the probability of the event occurring
     return same_birthday / iterations
 
 
