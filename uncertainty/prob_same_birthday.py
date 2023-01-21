@@ -1,6 +1,7 @@
 import random
 import math
 
+
 def same_birthday(n):
     same_birthday = 0
     iterations = 10000
@@ -13,16 +14,18 @@ def same_birthday(n):
             same_birthday += 1
     return same_birthday / iterations
 
+
 def make_group():
     group = []
-    days = set(range(1,365))
+    days = set(range(1, 365))
     counter = 0
-    while len(days)>0:
+    while len(days) > 0:
         birthday = random.randint(1, 365)
         group.append(birthday)
-        counter +=1
+        counter += 1
         days.discard(birthday)
     return counter
+
 
 def task1():
     # the value of N when the probability will be greater than 50%
@@ -43,16 +46,19 @@ def task1():
     print("The proportion of N where the event happens with the least 50% chance is:", proportion)
     print("The smallest N where the probability of the event occurring is at least 50% is:", min_n)
 
+
 def task2():
     trials = 1000
     total_people = 0
     for _ in range(trials):
         total_people += make_group()
-    
+
     average_people = total_people / trials
-    
+
     # Rounding up to the nearest integer
-    print("The expected number of people to add to the group:", math.ceil(average_people))
+    print("The expected number of people to add to the group:",
+          math.ceil(average_people))
+
 
 if __name__ == "__main__":
     task1()
