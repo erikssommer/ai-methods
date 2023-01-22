@@ -29,7 +29,7 @@ def task1():
 
 def same_birthday(n):
     """ 
-    Function that takes N and computes the probability of the event via simulation
+    Function that takes N people and computes the probability of the event
     """
     # The number of times the event occurs
     same_birthday = 0
@@ -49,14 +49,14 @@ def same_birthday(n):
 
 
 def task2():
-    # The number of trials to run
-    trials = 1000
+    # The number of simulations to run
+    iterations = 1000
     total_people = 0
-    for _ in range(trials):
+    for _ in range(iterations):
         total_people += make_group()
 
     # The average number of people to add to the group
-    average_people = total_people / trials
+    average_people = total_people / iterations
 
     # Rounding up to the nearest integer
     print("The expected number of people to add to the group:",
