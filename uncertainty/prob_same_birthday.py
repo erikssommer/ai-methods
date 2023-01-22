@@ -2,7 +2,7 @@ import random
 import math
 
 
-def task1():
+def part1():
     # The value of N when the probability will be greater than 50%
     n_values = range(10, 50)
     prob_min_50 = 0
@@ -48,7 +48,7 @@ def same_birthday(n):
     return same_birthday / iterations
 
 
-def task2():
+def part2():
     # The number of simulations to run
     iterations = 1000
     total_people = 0
@@ -82,6 +82,6 @@ def make_group():
 
 if __name__ == "__main__":
     print("------ Part 1 -------")
-    task1()
+    part1()
     print("------ Part 2 -------")
-    task2()
+    part2()
