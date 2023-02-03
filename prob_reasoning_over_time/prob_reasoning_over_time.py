@@ -7,7 +7,7 @@ def normalize(matrix):
 
 # Forward algorithm
 def forward(T, O, prob):
-    return normalize(np.dot(np.dot(O, T.T), prob))
+    return normalize(np.dot(np.dot(O, T), prob))
 
 
 def main():
