@@ -29,7 +29,8 @@
   \[P(X_t|X_{t-1})= \begin{pmatrix} 0.7 & 0.3 \\ 0.3 & 0.7 \end{pmatrix}\]
   And observation model \(P(E_t|X_t)\):
   \[P(E_t|X_t)= \begin{pmatrix} 0.9 & 0.1 \\ 0.2 & 0.8 \end{pmatrix}\]
-  \item The assumptions that are encoded in this model is that the current state of weather depends only on the previous state and not on any earlier states, where the states are days. This assumption is reasonable since it does not take too many states into consideration. We have no information about where this is, and the location can have very large influence on the model and accuracy of result.
+  where 0.9 is the probability of observing an umbrella when it is raining and 0.2 otherwise.
+  \item The assumptions that are encoded in this model is that the current state of weather depends only on the previous state and not on any earlier states, where the states are days. This is therefor a first order Markov assumption. This assumption is reasonable since it does not take too many states into consideration. We have no information about where this is, and the location can have very large influence on the model and accuracy of result.
 \end{itemize}
 
 
