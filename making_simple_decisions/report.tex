@@ -1,0 +1,89 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{TDT4171 — Artificial Intelligence Methods \\ Assignment 4 - Making simple decisions}
+\author{Erik Storås Sommer - 535006}
+\date{February 2023}
+
+\begin{document}
+\maketitle
+
+\section*{Exercise 1}
+
+\subsection*{a.}
+
+The first Bayes net (Wrapper $\rightarrow$ Flavor $\leftarrow$ Shape) can not correctly represent P(Flavor,Wrapper,Shape) because Wrapper and Shape are dependant of eachother.
+
+The second Bayes net (Flavor $\leftarrow$ Wrapper $\rightarrow$ Shape $\rightarrow$ Flavor) correctly represents the dependencies between the variables and also represents the interdependence between Flavor, Wrapper, and Shape, but it creates a cyclic graph, which is not desirable in a Bayesian network.
+
+The third Bayes net (Wrapper $\leftarrow$ Flavor $\rightarrow$ Shape) represents the direct causal relationships between Wrapper, Flavor, and Shape, as well as the interdependence between the variables, and it does not create a cyclic graph, making it the most desirable representation of the variables.
+
+\subsection*{b.}
+
+The best representation for this problem is the Bayes net (iii). This network is the most compact representation that captures the causal relationships between the variables, and it is also the easiest to use in deducing the numbers required by the conditional probability tables. In this network, the flavor of the candy is first determined, and then the wrapper and shape are selected based on the flavor. The conditional probability tables for this network can be easily computed from the information given in the story.
+
+
+\subsection*{c.}
+
+Yes, network (i) asserts that Wrapper is independent of Shape. The directed edge between Wrapper and Flavor in this network represents a causal relationship, meaning that Wrapper is dependent on Flavor but not on Shape. The absence of an edge between Wrapper and Shape in this network represents that Wrapper and Shape are conditionally independent given Flavor.
+
+\subsection*{d.}
+
+The probability that the flavor of the candy is strawberry, given that it is a round candy with a red wrapper, can be calculated using Bayes' Theorem as follows:
+
+\[P(W = r) = P(W = r | F = s) \cdot P(F = s) + P(W = r | F = a) \cdot P(F = a)\]
+
+where W = r is the event that the wrapper is red, F = s is the event that the flavor is strawberry, and F = a is the event that the flavor is anchovy.
+
+Applying the probabilities given in the story, we get:
+
+\[P(W = r) = 0.7 \cdot 0.8 + 0.3 \cdot 0.1 = 0.59\]
+
+The the probability that your candy has a red wrapper is 59 percent.
+
+
+\subsection*{e.}
+
+Defining S = r as the event that the shape is round, and W = r as the event that the wrapper is red, we can calculate the probability that the flavor is strawberry, given that the shape is round and the wrapper is red, using Bayes' Theorem as follows:
+
+\[P(F | S = r, W = r) = \alpha P(S = r, W = r | F) \cdot P(F)\]
+\[= \alpha P(S = r | F) \cdot P(W = r | F) \cdot P(F)\]
+\[= \alpha \langle 0.8 \cdot 0.8 \cdot 0.7, 0.1 \cdot 0.1 \cdot 0.3 \rangle \]
+\[= \alpha \langle 0.448, 0.003 \rangle\]
+
+We see that the probability that the canys flavor is strawberry is \(>\) 99.9 percent higher than the probability that the flavor is anchovy.
+
+\subsection*{f.}
+
+Denoting R as the event of a candy having a red wrapper, S as the event of a candy being round, and F as the event of a candy being strawberry flavored.
+
+Using the Bayes' Rule, the probability of F given R and S can be calculated as:
+\[P(F|R,S) = P(R|F,S) * P(F) / (P(R|F,S) * P(F) + P(R|~F,S) * P(~F))\]
+
+Where:
+\[P(F = s) = 0.7\]
+\[P(W = r|F = s, S = r) = 0.8\]
+\[P(W = r|\neg F = s, S = R) = 0\]
+\[P(\neg F = s) = 0.3\]
+
+Plugging in the values, we get:
+\[P(F|R,S) = 0.8 * 0.7 / (0.8 * 0.7 + 0 * 0.3) = 0.8 * 0.7 / 0.7 = 0.8\]
+
+Thus, the expected value of an unopened candy box can be calculated as:
+
+\[E(Box) = s * P(F|R,S) + a * (1 - P(F|R,S))\]
+\[E(Box) = s * 0.8 + a * (1 - 0.8) = 0.8 * s + 0.2 * a\]
+
+\end{document}
