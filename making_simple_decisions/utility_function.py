@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def U(x, R):
     return -np.exp(-x/R)
 
-
+# R is a positive constant representing an individual’s risk tolerance
 R = 1  # choose a value for the constant R
 x = np.linspace(0, 10, num=100)  # create an array of x values
 y = U(x, R)  # calculate the corresponding y values
