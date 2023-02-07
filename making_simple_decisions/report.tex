@@ -24,11 +24,11 @@
 
 \subsection*{a.}
 
-The first Bayes net (Wrapper $\rightarrow$ Flavor $\leftarrow$ Shape) can not correctly represent P(Flavor,Wrapper,Shape) because Wrapper and Shape are dependant of eachother.
+The first Bayes net (i) can not correctly represent P(Flavor,Wrapper,Shape) because Wrapper and Shape are dependant of eachother.
 
-The second Bayes net (Flavor $\leftarrow$ Wrapper $\rightarrow$ Shape $\rightarrow$ Flavor) correctly represents the dependencies between the variables and also represents the interdependence between Flavor, Wrapper, and Shape, but it creates a cyclic graph, which is not desirable in a Bayesian network.
+The second Bayes net (ii) correctly represents the dependencies between the variables and also represents the interdependence between Flavor, Wrapper, and Shape, but it creates a cyclic graph, which is not desirable in a Bayesian network.
 
-The third Bayes net (Wrapper $\leftarrow$ Flavor $\rightarrow$ Shape) represents the direct causal relationships between Wrapper, Flavor, and Shape, as well as the interdependence between the variables, and it does not create a cyclic graph, making it the most desirable representation of the variables.
+The third Bayes net (iii) represents the direct causal relationships between Wrapper, Flavor, and Shape, as well as the interdependence between the variables, and it does not create a cyclic graph, making it the most desirable representation of the variables.
 
 \subsection*{b.}
 
