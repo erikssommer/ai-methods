@@ -10,6 +10,7 @@
 
 % Useful packages
 \usepackage{amsmath}
+\usepackage{amsfonts} 
 \usepackage{graphicx}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
@@ -26,9 +27,9 @@
 
 The first Bayes net (i) can not correctly represent P(Flavor,Wrapper,Shape) because Wrapper and Shape are dependant of eachother.
 
-The second Bayes net (ii) correctly represents the dependencies between the variables and also represents the interdependence between Flavor, Wrapper, and Shape, but it creates a cyclic graph, which is not desirable in a Bayesian network.
+The second Bayes net (ii) correctly represents the dependencies between the variables, but it creates a cyclic graph, which is not desirable in a Bayesian network.
 
-The third Bayes net (iii) represents the direct causal relationships between Wrapper, Flavor, and Shape, as well as the interdependence between the variables, and it does not create a cyclic graph.
+The third Bayes net (iii) represents the direct causal relationships between Wrapper, Flavor, and Shape, and it does not create a cyclic graph.
 
 \subsection*{b.}
 
@@ -65,7 +66,7 @@ Defining S = r as the event that the shape is round, and W = r as the event that
 
 We get:
 
-\[P(F = s | S = r \wedge W = r) = 0.448 / (0.448 + 0.003) = 0.993\]
+\[P(F = s | S = r \wedge W = r) = \dfrac{0.448}{0.448 + 0.003} = 0.993\]
 
 We see that the probability that the candy flavor is strawberry is \(>\) 99 percent higher than the probability that the flavor is anchovy.
 
@@ -110,7 +111,47 @@ Setting EU1 = EU2, we get:
 
 \[-e^{-100/R} = 0.5 * -e^{-500/R} -0.5\]
 
-Solving for R, we get the real solution:
+\[-e^{-100/R} = -\dfrac{1}{2e^{500/R}} -0.5\]
+
+\[-e^{-100/R} * 2e^{500/R} = (-\dfrac{1}{2e^{500/R}} -0.5) * 2e^{500/R}\]
+
+\[-2e^{-400/R} = -\dfrac{1}{2e^{500/R}} -0.5 * 2e^{500/R}\]
+
+\[-2e^{-400/R} = -1 - e^{500/R}\]
+
+\[-2e^{-400/R} - (-1 - e^{500/R}) = 0\]
+
+Solve the equation using substitution \(t=e^{100/R}\):
+
+\[-2t^{4} + 1 + t^{5}\]
+
+\[(1 - t)(t^3-t^4+t^2+t+1) = 0\]
+
+Separate the equation into 2 possible cases
+
+\[1 - t = 0\]
+\[t^3-t^4+t^2+t+1 = 0\]
+
+\[t = 1\]
+\[t^3-t^4+t^2+t+1 = 0\]
+
+\[t = 1\]
+\[t \approx -0.7748\]
+\[t \approx 1.927562\]
+
+Substitute back into the original equation:
+
+\[e^{100/R} = 1\]
+\[e^{100/R} \approx -0.7748\]
+\[e^{100/R} \approx 1.927562\]
+
+\[R \in \emptyset\]
+\[R \notin \mathbb{R}\]
+\[e^{100/R} \approx 1.927562\]
+
+Solve the equation for R
+
+\[R = \dfrac{100}{ln(1.927562)}\]
 
 \[R \approx 152.38\]
 
