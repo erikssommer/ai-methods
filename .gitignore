@@ -136,3 +136,6 @@ dmypy.json
 *.toc
 *.out
 *.log
+
+# Mac files
+.DS_Store
