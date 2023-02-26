@@ -19,7 +19,99 @@
 
 \begin{document}
 \maketitle
+\setlength{\parindent}{0pt}
 
+\section*{Excercise 1 - Decision Support System}
 
+In this exercise, I have developed a decision support system to assist in choosing the most suitable cross-country skiing technique for a trip.
+This is a choice I often face when going on a ski session.
+The choice is between whether I should choose to go classical technique or skating technique. The least desirable outcome is that there will be no session.
+The system involves the following:
+
+\subsection*{Modeling the system}
+
+\begin{figure}[hbtp]
+    \includegraphics[width=\linewidth]{main_model.png}
+    \caption{DSS}
+    \label{fig:image1}
+\end{figure}
+
+Decision problem: Choice of cross-country skiing technique for the session.
+\begin{itemize}
+    \item Classic
+    \item Skating
+    \item No session
+\end{itemize}
+
+Uncertan variables:
+\begin{itemize}
+    \item Track traffic
+    \item The track is prepared
+    \item Snow conditions
+    \item Track width
+    \item Preference
+\end{itemize}
+
+Certain variables:
+\begin{itemize}
+    \item Temperature
+    \item Sleep night before
+    \item Previous session
+\end{itemize}
+
+Utility functions:
+\begin{itemize}
+    \item Willingness
+    \item Training effect
+\end{itemize}
+
+\subsection*{Probability tables}
+
+Preference
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{preference.png}
+    \caption{Probability table for preference}
+    \label{fig:image2}
+\end{figure}
+
+Snow conditions
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{snow_conditions.png}
+    \caption{Probability table for snow conditions}
+    \label{fig:image3}
+\end{figure}
+
+Track traffic
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{track_traffic.png}
+    \caption{Probability table for track traffic}
+    \label{fig:image4}
+\end{figure}
+
+\newpage
+
+Willingness
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{willingness.png}
+    \caption{Probability table for willingness utility}
+    \label{fig:image5}
+\end{figure}
+
+Training effect
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{training_effect.png}
+    \caption{Probability table for training effect utility}
+    \label{fig:image6}
+\end{figure}
 
 \end{document}
