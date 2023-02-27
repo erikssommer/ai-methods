@@ -47,7 +47,10 @@ def importance(attributes: np.ndarray, examples: np.ndarray, measure: str) -> in
 
     """
     # TODO implement the importance function for both measure = "random" and measure = "information_gain"
-    pass
+    if measure == "random":
+        return np.random.randint(0, attributes.size)
+    elif measure == "information_gain":
+        pass
 
 
 def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_examples: np.ndarray,
@@ -59,7 +62,7 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
     Parameters:
         examples (np.ndarray): The set data examples to consider at the current node
         attributes (np.ndarray): The set of attributes that can be chosen as the test at the current node
-        parent_examples (np.ndarray): The set of examples that were used in constructing the current node’s parent.
+        parent_examples (np.ndarray): The set of examples that were used in constructing the current node's parent.
                                         If at the root of the tree, parent_examples = None
         parent (Node): The parent node of the current node. If at the root of the tree, parent = None
         branch_value (int): The attribute value corresponding to reaching the current node from its parent.
@@ -76,23 +79,20 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
         parent.children[branch_value] = node
         node.parent = parent
 
-    # TODO implement the steps of the pseudocode in Figure 19.5 on page 678
-    if not examples:
-        return plurality_value(parent_examples)
-    elif np.all(examples[:, -1] == examples[0, -1]):
-        return examples[0, -1]
-    elif not attributes:
-        return plurality_value(examples)
+    # Implemented the steps of the pseudocode in Figure 19.5 on page 678
+    if len(examples) == 0:
+        node.value = plurality_value(parent_examples)
+    elif len(np.unique(examples[:, -1])) == 1:
+        node.value = examples[0, -1]
+    elif len(attributes) == 0:
+        node.value = plurality_value(examples)
     else:
-        best_attribute = argmax(
-            attributes, lambda attr: importance(attr, examples))
-        tree = {best_attribute: {}}
-        for value in get_attribute_values(best_attribute, examples):
-            exs = [example for example in examples if example[best_attribute] == value]
-            subtree = learn_decision_tree(
-                exs, [attr for attr in attributes if attr != best_attribute], examples)
-            tree[best_attribute][value] = subtree
-        return tree
+        A = importance(attributes, examples, measure)
+        node.attribute = A
+        for v in get_attribute_values(A, examples):
+            exs = examples[examples[:, A] == v]
+            learn_decision_tree(exs, np.delete(attributes, A), examples, node, v, measure)
+    return node
 
 
 def argmax(iterable, key=None):
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     train, test = load_data()
 
     # information_gain or random
-    measure = "information_gain"
+    measure = "random"
 
     tree = learn_decision_tree(examples=train,
                                attributes=np.arange(
