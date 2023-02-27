@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Tuple
 
 
-
 class Node:
     """ Node class used to build the decision tree"""
+
     def __init__(self):
         self.children = {}
         self.parent = None
@@ -16,7 +16,6 @@ class Node:
         if self.value is not None:
             return self.value
         return self.children[example[self.attribute]].classify(example)
-
 
 
 def plurality_value(examples: np.ndarray) -> int:
@@ -78,9 +77,30 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
         node.parent = parent
 
     # TODO implement the steps of the pseudocode in Figure 19.5 on page 678
+    if not examples:
+        return plurality_value(parent_examples)
+    elif np.all(examples[:, -1] == examples[0, -1]):
+        return examples[0, -1]
+    elif not attributes:
+        return plurality_value(examples)
+    else:
+        best_attribute = argmax(
+            attributes, lambda attr: importance(attr, examples))
+        tree = {best_attribute: {}}
+        for value in get_attribute_values(best_attribute, examples):
+            exs = [example for example in examples if example[best_attribute] == value]
+            subtree = learn_decision_tree(
+                exs, [attr for attr in attributes if attr != best_attribute], examples)
+            tree[best_attribute][value] = subtree
+        return tree
 
-    return node
 
+def argmax(iterable, key=None):
+    return np.argmax([key(x) if key else x for x in iterable])
+
+
+def get_attribute_values(attribute, examples):
+    return set(examples[:, attribute])
 
 
 def accuracy(tree: Node, examples: np.ndarray) -> float:
@@ -102,8 +122,6 @@ def load_data() -> Tuple[np.ndarray, np.ndarray]:
     return train, test
 
 
-
-
 if __name__ == '__main__':
 
     train, test = load_data()
@@ -112,11 +130,12 @@ if __name__ == '__main__':
     measure = "information_gain"
 
     tree = learn_decision_tree(examples=train,
-                    attributes=np.arange(0, train.shape[1] - 1, 1, dtype=int),
-                    parent_examples=None,
-                    parent=None,
-                    branch_value=None,
-                    measure=measure)
+                               attributes=np.arange(
+                                   0, train.shape[1] - 1, 1, dtype=int),
+                               parent_examples=None,
+                               parent=None,
+                               branch_value=None,
+                               measure=measure)
 
     print(f"Training Accuracy {accuracy(tree, train)}")
     print(f"Test Accuracy {accuracy(tree, test)}")
