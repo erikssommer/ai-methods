@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 from typing import Tuple
+import graphviz
 
 
 class Node:
@@ -50,7 +51,31 @@ def importance(attributes: np.ndarray, examples: np.ndarray, measure: str) -> in
     if measure == "random":
         return np.random.randint(0, attributes.size)
     elif measure == "information_gain":
-        pass
+        return argmax(attributes, lambda a: information_gain(examples, a))
+
+
+def argmax(iterable, key=None):
+    return np.argmax([key(x) if key else x for x in iterable])
+
+
+def entropy(examples):
+    """ Calculates entropy of examples """
+    labels = examples[:, -1]
+    entropy = 0
+    for label in np.unique(labels):
+        label_count = np.count_nonzero(labels == label)
+        prob = label_count / labels.size
+        entropy += -prob * np.log2(prob)
+    return entropy
+
+
+def information_gain(examples, attribute):
+    """ Calculates information gain of attribute on examples """
+    gain = entropy(examples)
+    for v in get_attribute_values(attribute, examples):
+        exs = examples[examples[:, attribute] == v]
+        gain -= exs.shape[0] / examples.shape[0] * entropy(exs)
+    return gain
 
 
 def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_examples: np.ndarray,
@@ -91,12 +116,9 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
         node.attribute = A
         for v in get_attribute_values(A, examples):
             exs = examples[examples[:, A] == v]
-            learn_decision_tree(exs, np.delete(attributes, A), examples, node, v, measure)
+            learn_decision_tree(exs, np.delete(
+                attributes, A), examples, node, v, measure)
     return node
-
-
-def argmax(iterable, key=None):
-    return np.argmax([key(x) if key else x for x in iterable])
 
 
 def get_attribute_values(attribute, examples):
