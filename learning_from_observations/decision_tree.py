@@ -22,6 +22,7 @@ class Node:
 
 
 def visualize_tree(node, graph=None):
+    """Visualizes the decision tree using graphviz"""
     if graph is None:
         graph = gv.Digraph()
         graph.attr("node", shape="box")
@@ -65,10 +66,12 @@ def importance(attributes: np.ndarray, examples: np.ndarray, measure: str) -> in
 
     """
     if measure == "random":
-        # Allocate a random number as importance to each attribute and return the attribute with highest importance
+        # Allocate a random number as importance to each attribute
+        # Return the attribute with highest importance
         return argmax(attributes, lambda _: np.random.random())
     elif measure == "information_gain":
-        # Calculate the information gain of each attribute and return the attribute with highest importance
+        # Allocate a number using the expected information gain as importance to each attribute.
+        # Return the attribute with highest importance
         return argmax(attributes, lambda a: information_gain(examples, a))
 
 
@@ -77,7 +80,7 @@ def argmax(iterable, key=None):
 
 
 def entropy(examples):
-    """ Calculates entropy of examples """
+    """Calculates entropy of examples"""
     labels = examples[:, -1]
     entropy = 0
     for label in np.unique(labels):
@@ -88,7 +91,7 @@ def entropy(examples):
 
 
 def information_gain(examples, attribute):
-    """ Calculates information gain of attribute on examples """
+    """Calculates information gain of attribute on examples"""
     gain = entropy(examples)
     for v in get_attribute_values(attribute, examples):
         exs = examples[examples[:, attribute] == v]
@@ -181,36 +184,45 @@ if __name__ == '__main__':
     # information_gain or random
     measure = "random"
 
-    num_trials = 100  # set the number of trials to run
-    train_accuracies = []  # create an empty list to store training accuracies
-    test_accuracies = []  # create an empty list to store test accuracies
+    # Set the number of trials to run
+    num_trials = 100
+    # List to store training accuracies
+    train_accuracies = []
+    # List to store test accuracies
+    test_accuracies = []
 
     for i in range(num_trials):
         tree = learn_decision_tree(examples=train,
-                                attributes=np.arange(0, train.shape[1] - 1, 1, dtype=int),
-                                parent_examples=None,
-                                parent=None,
-                                branch_value=None,
-                                measure=measure)
+                                   attributes=np.arange(
+                                       0, train.shape[1] - 1, 1, dtype=int),
+                                   parent_examples=None,
+                                   parent=None,
+                                   branch_value=None,
+                                   measure=measure)
 
         train_accuracy = accuracy(tree, train)
         test_accuracy = accuracy(tree, test)
 
-        train_accuracies.append(train_accuracy)  # append the training accuracy to the list
-        test_accuracies.append(test_accuracy)  # append the test accuracy to the list
+        # Append the training accuracy to the list
+        train_accuracies.append(train_accuracy)
+        # Append the test accuracy to the list
+        test_accuracies.append(test_accuracy)
 
-        if i == num_trials:
+        if i == num_trials-1:
             # Visualize the last tree
             graph = visualize_tree(tree)
             graph.render("tree")
 
-    mean_train_accuracy = np.mean(train_accuracies)  # calculate the mean of the training accuracies
-    mean_test_accuracy = np.mean(test_accuracies)  # calculate the mean of the test accuracies
-    var_train_accuracy = np.var(train_accuracies)  # calculate the variance of the training accuracies
-    var_test_accuracy = np.var(test_accuracies)  # calculate the variance of the test accuracies
+    # Calculate the mean of the training accuracies
+    mean_train_accuracy = np.mean(train_accuracies)
+    # Calculate the mean of the test accuracies
+    mean_test_accuracy = np.mean(test_accuracies)
+    # Calculate the variance of the training accuracies
+    var_train_accuracy = np.var(train_accuracies)
+    # Calculate the variance of the test accuracies
+    var_test_accuracy = np.var(test_accuracies)
 
     print(f"Mean Training Accuracy: {mean_train_accuracy}")
     print(f"Mean Test Accuracy: {mean_test_accuracy}")
     print(f"Variance Training Accuracy: {var_train_accuracy}")
     print(f"Variance Test Accuracy: {var_test_accuracy}")
-
