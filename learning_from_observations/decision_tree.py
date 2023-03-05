@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Tuple
 import graphviz as gv
 import math
+import time
+from datetime import datetime
 
 # Run 'pip install graphviz'
 
@@ -23,7 +25,10 @@ class Node:
 
 
 def visualize_tree(node, graph=None):
-    """Visualizes the decision tree using graphviz"""
+    """
+    Visualizes the decision tree using graphviz
+    For debugging and better understanding of the tree structure
+    """
     if graph is None:
         graph = gv.Digraph()
         graph.attr("node", shape="box")
@@ -213,6 +218,8 @@ if __name__ == '__main__':
     # information_gain or random
     measure = "random"
 
+    visualize = False
+
     for i in range(2):
         # Set the number of trials to run
         num_trials = 100
@@ -220,6 +227,9 @@ if __name__ == '__main__':
         train_accuracies = []
         # List to store test accuracies
         test_accuracies = []
+
+        fmt = '%H:%M:%S'
+        start_datetime = time.strftime(fmt)
 
         for i in range(num_trials):
             tree = learn_decision_tree(examples=train,
@@ -238,10 +248,10 @@ if __name__ == '__main__':
             # Append the test accuracy to the list
             test_accuracies.append(test_accuracy)
 
-            if i == num_trials-1:
+            if i == num_trials-1 and visualize:
                 # Visualize the last tree
                 graph = visualize_tree(tree)
-                graph.render("tree")
+                graph.render(measure)
 
         # Calculate the mean of the training accuracies
         mean_train_accuracy = np.mean(train_accuracies)
@@ -253,10 +263,18 @@ if __name__ == '__main__':
         var_test_accuracy = np.var(test_accuracies)
 
         print(f"Measure: {measure}")
+        print(f"Number of Trials: {num_trials}")
         print(f"Mean Training Accuracy: {mean_train_accuracy}")
         print(f"Mean Test Accuracy: {mean_test_accuracy}")
         print(f"Variance Training Accuracy: {var_train_accuracy}")
         print(f"Variance Test Accuracy: {var_test_accuracy}")
+
+        end_datetime = time.strftime(fmt)
+        # Calculate the time difference
+        total_datetime = datetime.strptime(
+            end_datetime, fmt) - datetime.strptime(start_datetime, fmt)
+        
+        print(f"Total Time: {total_datetime}")
 
         # Set the measure to the other measure
         if measure == "random":
