@@ -2,8 +2,9 @@ import numpy as np
 from pathlib import Path
 from typing import Tuple
 import graphviz as gv
+import math
 
-# Run pip install graphviz
+# Run 'pip install graphviz'
 
 
 class Node:
@@ -68,35 +69,60 @@ def importance(attributes: np.ndarray, examples: np.ndarray, measure: str) -> in
     if measure == "random":
         # Allocate a random number as importance to each attribute
         # Return the attribute with highest importance
-        return argmax(attributes, lambda _: np.random.random())
+        return attributes[np.argmax(np.random.rand(len(attributes)))]
     elif measure == "information_gain":
-        # Allocate a number using the expected information gain as importance to each attribute.
-        # Return the attribute with highest importance
-        return argmax(attributes, lambda a: information_gain(examples, a))
+        # Using the fact that there are only two possible values for each attribute
+        # Count the number of examples where the 8th element is 2
+        positive_examples = sum(example[7] == 2 for example in examples)
 
+        # Calculate the total entropy of the dataset
+        total_entropy = entropy(
+            positive_examples, len(examples) - positive_examples)
 
-def argmax(iterable, key=None):
-    return np.argmax([key(x) if key else x for x in iterable])
+        # Calculate the information gain for each attribute
+        attribute_info_gains = []
 
+        # Iterate over all attributes
+        for attribute in attributes:
+            # Count the number of examples for each possible value of the attribute
+            feature_counts = [
+                sum(example[attribute] == i for example in examples) for i in [1, 2]]
 
-def entropy(examples):
-    """Calculates entropy of examples"""
-    labels = examples[:, -1]
-    entropy = 0
-    for label in np.unique(labels):
-        label_count = np.count_nonzero(labels == label)
-        prob = label_count / labels.size
-        entropy += -prob * np.log2(prob)
+            # Calculate the entropy of the dataset for each possible value of the attribute
+            feature_entropies = [entropy(sum((example[attribute] == i) and (
+                example[7] == 2) for example in examples), count) for count in feature_counts]
+
+            # Calculate the information gain for this attribute
+            attribute_info_gain = information_gain(total_entropy, examples, feature_counts, feature_entropies)
+            attribute_info_gains.append(attribute_info_gain)
+
+        # Return the attribute with the highest information gain
+        return attributes[np.argmax(attribute_info_gains)]
+
+def information_gain(total_entropy, examples, feature_counts, feature_entropies) -> float:
+    # Calculate the weighted average of feature entropies
+    weighted_entropies = [count / len(examples) * entropy for count, entropy in zip(feature_counts, feature_entropies)]
+    weighted_entropy_sum = sum(weighted_entropies)
+    
+    # Calculate the information gain for this attribute
+    attribute_info_gain = total_entropy - weighted_entropy_sum
+    
+    # Return the information gain
+    return attribute_info_gain
+
+def entropy(positive_examples, negative_examples):
+    # Calculate the probability of a positive example
+    q = positive_examples / (positive_examples + negative_examples)
+
+    # Calculate the entropy of the dataset using the binary entropy formula
+    try:
+        entropy = -(q * math.log2(q) + (1 - q) * math.log2(1 - q))
+    except ValueError:
+        # Handle the case where q is zero or one, which would cause a math domain error
+        entropy = 0
+
+    # Return the entropy of the dataset
     return entropy
-
-
-def information_gain(examples, attribute):
-    """Calculates information gain of attribute on examples"""
-    gain = entropy(examples)
-    for v in get_attribute_values(attribute, examples):
-        exs = examples[examples[:, attribute] == v]
-        gain -= exs.shape[0] / examples.shape[0] * entropy(exs)
-    return gain
 
 
 def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_examples: np.ndarray,
@@ -142,12 +168,16 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
         # Set the node's attribute to the chosen attribute
         node.attribute = A
         # For each unique value of the chosen attribute
-        for v in get_attribute_values(A, examples):
-            # Examples with the value v for the chosen attribute
-            exs = examples[examples[:, A] == v]
-            # Recursively learn the decision tree
-            learn_decision_tree(exs, np.delete(
-                attributes, A), examples, node, v, measure)
+
+        # Using the fact that there are only two possible values for each attribute
+        exs_1 = [example for example in examples if example[A] == 1]
+        exs_2 = [example for example in examples if example[A] != 1]
+
+        # Recursively learn the decision tree
+        learn_decision_tree(np.array(exs_1), np.delete(
+            attributes, np.where(attributes == A)), examples, node, 1, measure)
+        learn_decision_tree(np.array(exs_2), np.delete(
+            attributes, np.where(attributes == A)), examples, node, 2, measure)
 
     # The node is returned when the recursion is finished
     return node
@@ -184,45 +214,51 @@ if __name__ == '__main__':
     # information_gain or random
     measure = "random"
 
-    # Set the number of trials to run
-    num_trials = 100
-    # List to store training accuracies
-    train_accuracies = []
-    # List to store test accuracies
-    test_accuracies = []
+    for i in range(2):
+        # Set the number of trials to run
+        num_trials = 100
+        # List to store training accuracies
+        train_accuracies = []
+        # List to store test accuracies
+        test_accuracies = []
 
-    for i in range(num_trials):
-        tree = learn_decision_tree(examples=train,
-                                   attributes=np.arange(
-                                       0, train.shape[1] - 1, 1, dtype=int),
-                                   parent_examples=None,
-                                   parent=None,
-                                   branch_value=None,
-                                   measure=measure)
+        for i in range(num_trials):
+            tree = learn_decision_tree(examples=train,
+                                       attributes=np.arange(
+                                           0, train.shape[1] - 1, 1, dtype=int),
+                                       parent_examples=None,
+                                       parent=None,
+                                       branch_value=None,
+                                       measure=measure)
 
-        train_accuracy = accuracy(tree, train)
-        test_accuracy = accuracy(tree, test)
+            train_accuracy = accuracy(tree, train)
+            test_accuracy = accuracy(tree, test)
 
-        # Append the training accuracy to the list
-        train_accuracies.append(train_accuracy)
-        # Append the test accuracy to the list
-        test_accuracies.append(test_accuracy)
+            # Append the training accuracy to the list
+            train_accuracies.append(train_accuracy)
+            # Append the test accuracy to the list
+            test_accuracies.append(test_accuracy)
 
-        if i == num_trials-1:
-            # Visualize the last tree
-            graph = visualize_tree(tree)
-            graph.render("tree")
+            if i == num_trials-1:
+                # Visualize the last tree
+                graph = visualize_tree(tree)
+                graph.render("tree")
 
-    # Calculate the mean of the training accuracies
-    mean_train_accuracy = np.mean(train_accuracies)
-    # Calculate the mean of the test accuracies
-    mean_test_accuracy = np.mean(test_accuracies)
-    # Calculate the variance of the training accuracies
-    var_train_accuracy = np.var(train_accuracies)
-    # Calculate the variance of the test accuracies
-    var_test_accuracy = np.var(test_accuracies)
+        # Calculate the mean of the training accuracies
+        mean_train_accuracy = np.mean(train_accuracies)
+        # Calculate the mean of the test accuracies
+        mean_test_accuracy = np.mean(test_accuracies)
+        # Calculate the variance of the training accuracies
+        var_train_accuracy = np.var(train_accuracies)
+        # Calculate the variance of the test accuracies
+        var_test_accuracy = np.var(test_accuracies)
 
-    print(f"Mean Training Accuracy: {mean_train_accuracy}")
-    print(f"Mean Test Accuracy: {mean_test_accuracy}")
-    print(f"Variance Training Accuracy: {var_train_accuracy}")
-    print(f"Variance Test Accuracy: {var_test_accuracy}")
+        print(f"Measure: {measure}")
+        print(f"Mean Training Accuracy: {mean_train_accuracy}")
+        print(f"Mean Test Accuracy: {mean_test_accuracy}")
+        print(f"Variance Training Accuracy: {var_train_accuracy}")
+        print(f"Variance Test Accuracy: {var_test_accuracy}")
+
+        # Set the measure to the other measure
+        if measure == "random":
+            measure = "information_gain"
