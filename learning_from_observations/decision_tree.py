@@ -100,7 +100,7 @@ def information_gain(attributes: np.ndarray, examples: np.ndarray):
         # Calculate the weighted average of feature entropies
         weighted_entropies = [
             count / len(examples) * entropy for count, entropy in zip(feature_counts, feature_entropies)]
-        
+
         # Calculate the sum of weighted entropies
         weighted_entropy_sum = sum(weighted_entropies)
 
@@ -185,11 +185,6 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
 
     # The node is returned when the recursion is finished
     return node
-
-
-def get_attribute_values(attribute, examples):
-    """ Returns the unique values of the attribute in the examples """
-    return set(examples[:, attribute])
 
 
 def accuracy(tree: Node, examples: np.ndarray) -> float:
