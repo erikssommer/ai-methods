@@ -199,13 +199,18 @@ if __name__ == '__main__':
         train_accuracies.append(train_accuracy)  # append the training accuracy to the list
         test_accuracies.append(test_accuracy)  # append the test accuracy to the list
 
-        mean_train_accuracy = sum(train_accuracies) / num_trials  # calculate the mean of the training accuracies
-        mean_test_accuracy = sum(test_accuracies) / num_trials  # calculate the mean of the test accuracies
-
         if i == num_trials:
             # Visualize the last tree
             graph = visualize_tree(tree)
             graph.render("tree")
 
+    mean_train_accuracy = np.mean(train_accuracies)  # calculate the mean of the training accuracies
+    mean_test_accuracy = np.mean(test_accuracies)  # calculate the mean of the test accuracies
+    var_train_accuracy = np.var(train_accuracies)  # calculate the variance of the training accuracies
+    var_test_accuracy = np.var(test_accuracies)  # calculate the variance of the test accuracies
+
     print(f"Mean Training Accuracy: {mean_train_accuracy}")
     print(f"Mean Test Accuracy: {mean_test_accuracy}")
+    print(f"Variance Training Accuracy: {var_train_accuracy}")
+    print(f"Variance Test Accuracy: {var_test_accuracy}")
+
