@@ -1,7 +1,9 @@
 import numpy as np
 from pathlib import Path
 from typing import Tuple
-import graphviz
+import graphviz as gv
+
+# Run pip install graphviz
 
 
 class Node:
@@ -17,6 +19,21 @@ class Node:
         if self.value is not None:
             return self.value
         return self.children[example[self.attribute]].classify(example)
+
+
+def visualize_tree(node, graph=None):
+    if graph is None:
+        graph = gv.Digraph()
+        graph.attr("node", shape="box")
+    if node.attribute is None:
+        graph.node(str(id(node)), str(node.value), shape="oval")
+    else:
+        graph.node(str(id(node)), str(node.attribute))
+        for value, child_node in node.children.items():
+            child_id = str(id(child_node))
+            graph.edge(str(id(node)), child_id, label=str(value))
+            visualize_tree(child_node, graph)
+    return graph
 
 
 def plurality_value(examples: np.ndarray) -> int:
@@ -171,6 +188,9 @@ if __name__ == '__main__':
                                parent=None,
                                branch_value=None,
                                measure=measure)
+
+    graph = visualize_tree(tree)
+    graph.render("tree")
 
     print(f"Training Accuracy {accuracy(tree, train)}")
     print(f"Test Accuracy {accuracy(tree, test)}")
