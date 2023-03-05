@@ -120,7 +120,7 @@ def information_gain(attributes: np.ndarray, examples: np.ndarray):
 
 
 def entropy(value2, value1):
-    # Calculate the probability of a positive example
+    # Calculate the probability of a value = 2 example
     q = value2 / (value2 + value1)
 
     # Calculate the entropy of the dataset using the binary entropy formula
