@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 from typing import Tuple
+import graphviz
 
 
 class Node:
@@ -46,10 +47,11 @@ def importance(attributes: np.ndarray, examples: np.ndarray, measure: str) -> in
         (int): The index of the attribute chosen as the test
 
     """
-    # TODO implement the importance function for both measure = "random" and measure = "information_gain"
     if measure == "random":
-        return np.random.randint(0, attributes.size)
+        # Allocate a random number as importance to each attribute and return the attribute with highest importance
+        return argmax(attributes, lambda _: np.random.random())
     elif measure == "information_gain":
+        # Calculate the information gain of each attribute and return the attribute with highest importance
         return argmax(attributes, lambda a: information_gain(examples, a))
 
 
@@ -104,23 +106,35 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
         node.parent = parent
 
     # Implemented the steps of the pseudocode in Figure 19.5 on page 678
+    # Some changes due to the node creation and linking above
     if len(examples) == 0:
+        # If examples is empty, return the plurality value of parent_examples
         node.value = plurality_value(parent_examples)
     elif len(np.unique(examples[:, -1])) == 1:
+        # If all examples have the same label, return the label
         node.value = examples[0, -1]
     elif len(attributes) == 0:
+        # If attributes is empty, return the plurality value of examples
         node.value = plurality_value(examples)
     else:
+        # Choose the attribute with highest importance
         A = importance(attributes, examples, measure)
+        # Set the node's attribute to the chosen attribute
         node.attribute = A
+        # For each unique value of the chosen attribute
         for v in get_attribute_values(A, examples):
+            # Examples with the value v for the chosen attribute
             exs = examples[examples[:, A] == v]
+            # Recursively learn the decision tree
             learn_decision_tree(exs, np.delete(
                 attributes, A), examples, node, v, measure)
+
+    # The node is returned when the recursion is finished
     return node
 
 
 def get_attribute_values(attribute, examples):
+    """ Returns the unique values of the attribute in the examples """
     return set(examples[:, attribute])
 
 
