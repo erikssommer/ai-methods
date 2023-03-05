@@ -67,52 +67,56 @@ def importance(attributes: np.ndarray, examples: np.ndarray, measure: str) -> in
 
     """
     if measure == "random":
-        # Allocate a random number as importance to each attribute
+        # Allocating a random number as importance to each attribute
         # Return the attribute with highest importance
         return attributes[np.argmax(np.random.rand(len(attributes)))]
     elif measure == "information_gain":
-        # Using the fact that there are only two possible values for each attribute
-        # Count the number of examples where the 8th element is 2
-        positive_examples = sum(example[7] == 2 for example in examples)
-
-        # Calculate the total entropy of the dataset
-        total_entropy = entropy(
-            positive_examples, len(examples) - positive_examples)
-
-        # Calculate the information gain for each attribute
-        attribute_info_gains = []
-
-        # Iterate over all attributes
-        for attribute in attributes:
-            # Count the number of examples for each possible value of the attribute
-            feature_counts = [
-                sum(example[attribute] == i for example in examples) for i in [1, 2]]
-
-            # Calculate the entropy of the dataset for each possible value of the attribute
-            feature_entropies = [entropy(sum((example[attribute] == i) and (
-                example[7] == 2) for example in examples), count) for count in feature_counts]
-
-            # Calculate the information gain for this attribute
-            attribute_info_gain = information_gain(total_entropy, examples, feature_counts, feature_entropies)
-            attribute_info_gains.append(attribute_info_gain)
-
         # Return the attribute with the highest information gain
-        return attributes[np.argmax(attribute_info_gains)]
+        return attributes[np.argmax(information_gain(attributes, examples))]
 
-def information_gain(total_entropy, examples, feature_counts, feature_entropies) -> float:
-    # Calculate the weighted average of feature entropies
-    weighted_entropies = [count / len(examples) * entropy for count, entropy in zip(feature_counts, feature_entropies)]
-    weighted_entropy_sum = sum(weighted_entropies)
-    
-    # Calculate the information gain for this attribute
-    attribute_info_gain = total_entropy - weighted_entropy_sum
-    
-    # Return the information gain
-    return attribute_info_gain
 
-def entropy(positive_examples, negative_examples):
+def information_gain(attributes: np.ndarray, examples: np.ndarray):
+    # Using the fact that there are only two possible values for each attribute
+    # Count the number of examples where the 8th element is 2
+    value2 = sum(example[7] == 2 for example in examples)
+    value1 = len(examples) - value2
+
+    # Calculate the total entropy of the dataset
+    total_entropy = entropy(value2, value1)
+
+    # Calculate the information gain for each attribute
+    information_gains = []
+
+    # Iterate over all attributes
+    for attribute in attributes:
+        # Count the number of examples for each possible value of the attribute
+        feature_counts = [
+            sum(example[attribute] == i for example in examples) for i in [1, 2]]
+
+        # Calculate the entropy of the dataset for each possible value of the attribute
+        feature_entropies = [entropy(sum((example[attribute] == i) and (
+            example[7] == 2) for example in examples), count) for count in feature_counts]
+
+        # Calculate the weighted average of feature entropies
+        weighted_entropies = [
+            count / len(examples) * entropy for count, entropy in zip(feature_counts, feature_entropies)]
+        
+        # Calculate the sum of weighted entropies
+        weighted_entropy_sum = sum(weighted_entropies)
+
+        # Calculate the information gain for current attribute
+        gain = total_entropy - weighted_entropy_sum
+
+        # Add the information gain to the list
+        information_gains.append(gain)
+
+    # Return the list of information gains
+    return information_gains
+
+
+def entropy(value2, value1):
     # Calculate the probability of a positive example
-    q = positive_examples / (positive_examples + negative_examples)
+    q = value2 / (value2 + value1)
 
     # Calculate the entropy of the dataset using the binary entropy formula
     try:
@@ -170,13 +174,13 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
         # For each unique value of the chosen attribute
 
         # Using the fact that there are only two possible values for each attribute
-        exs_1 = [example for example in examples if example[A] == 1]
-        exs_2 = [example for example in examples if example[A] != 1]
+        exs1 = [example for example in examples if example[A] == 1]
+        exs2 = [example for example in examples if example[A] != 1]
 
         # Recursively learn the decision tree
-        learn_decision_tree(np.array(exs_1), np.delete(
+        learn_decision_tree(np.array(exs1), np.delete(
             attributes, np.where(attributes == A)), examples, node, 1, measure)
-        learn_decision_tree(np.array(exs_2), np.delete(
+        learn_decision_tree(np.array(exs2), np.delete(
             attributes, np.where(attributes == A)), examples, node, 2, measure)
 
     # The node is returned when the recursion is finished
@@ -262,3 +266,6 @@ if __name__ == '__main__':
         # Set the measure to the other measure
         if measure == "random":
             measure = "information_gain"
+            print()
+        else:
+            measure = "random"
