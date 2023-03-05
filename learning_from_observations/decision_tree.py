@@ -181,16 +181,31 @@ if __name__ == '__main__':
     # information_gain or random
     measure = "random"
 
-    tree = learn_decision_tree(examples=train,
-                               attributes=np.arange(
-                                   0, train.shape[1] - 1, 1, dtype=int),
-                               parent_examples=None,
-                               parent=None,
-                               branch_value=None,
-                               measure=measure)
+    num_trials = 100  # set the number of trials to run
+    train_accuracies = []  # create an empty list to store training accuracies
+    test_accuracies = []  # create an empty list to store test accuracies
 
-    graph = visualize_tree(tree)
-    graph.render("tree")
+    for i in range(num_trials):
+        tree = learn_decision_tree(examples=train,
+                                attributes=np.arange(0, train.shape[1] - 1, 1, dtype=int),
+                                parent_examples=None,
+                                parent=None,
+                                branch_value=None,
+                                measure=measure)
 
-    print(f"Training Accuracy {accuracy(tree, train)}")
-    print(f"Test Accuracy {accuracy(tree, test)}")
+        train_accuracy = accuracy(tree, train)
+        test_accuracy = accuracy(tree, test)
+
+        train_accuracies.append(train_accuracy)  # append the training accuracy to the list
+        test_accuracies.append(test_accuracy)  # append the test accuracy to the list
+
+        mean_train_accuracy = sum(train_accuracies) / num_trials  # calculate the mean of the training accuracies
+        mean_test_accuracy = sum(test_accuracies) / num_trials  # calculate the mean of the test accuracies
+
+        if i == num_trials:
+            # Visualize the last tree
+            graph = visualize_tree(tree)
+            graph.render("tree")
+
+    print(f"Mean Training Accuracy: {mean_train_accuracy}")
+    print(f"Mean Test Accuracy: {mean_test_accuracy}")

@@ -139,3 +139,5 @@ dmypy.json
 
 # Mac files
 .DS_Store
+
+learning_from_observations/tree
