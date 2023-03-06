@@ -74,21 +74,6 @@ class NeuralNetwork:
     def predict(self, inputs):
         inputs = inputs.reshape(((self.input_size, self.output_size)))
         return self.forward(inputs)[0]
-    
-    """
-    def calculate_loss(self, inputs, targets):
-        # Forward pass
-        hidden_inputs = np.dot(self.weights_input_hidden, inputs)
-        hidden_outputs = sigmoid(hidden_inputs)
-
-        final_inputs = np.dot(self.weights_hidden_output, hidden_outputs)
-        final_outputs = final_inputs
-
-        # Calculate loss
-        loss = np.mean((targets - final_outputs) ** 2)
-
-        return loss
-    """
 
 
 if __name__ == "__main__":
@@ -123,16 +108,6 @@ if __name__ == "__main__":
     y_test_pred = np.array([nn.predict(X_test[i]) for i in range(len(X_test))])
     mse_test = np.mean((y_test - y_test_pred) ** 2)
     print("MSE on test set:", mse_test)
-
-    """
-    # Calculate loss on training set
-    loss_train = nn.calculate_loss(X_train.T, y_train)
-    print("Loss on training set:", loss_train)
-
-    # Calculate loss on test set
-    loss_test = nn.calculate_loss(X_test.T, y_test)
-    print("Loss on test set:", loss_test)
-    """
 
     # Plot predictions
     plt.scatter(y_train, y_train_pred)
