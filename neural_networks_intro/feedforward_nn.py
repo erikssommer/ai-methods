@@ -52,9 +52,11 @@ class NeuralNetwork:
             0.0, pow(self.hidden_size, -0.5), (self.output_size, self.hidden_size))
 
     def forward(self, inputs):
+        # Calculate the output of the hidden layer
         hidden_inputs = np.dot(self.weights_input_hidden, inputs)
         hidden_outputs = sigmoid(hidden_inputs)
 
+        # Calculate the output of the output layer
         final_inputs = np.dot(self.weights_hidden_output, hidden_outputs)
         final_outputs = final_inputs
 
@@ -65,24 +67,34 @@ class NeuralNetwork:
         hidden_inputs = np.dot(self.weights_input_hidden, inputs)
         hidden_outputs = sigmoid(hidden_inputs)
 
-        # Output layer
         final_inputs = np.dot(self.weights_hidden_output, hidden_outputs)
         final_outputs = final_inputs
 
         # Backward pass
+        # Calculate output layer error
         output_errors = targets - final_outputs
-        hidden_errors = np.dot(self.weights_hidden_output.T,
-                               output_errors) * hidden_outputs * (1 - hidden_outputs)
 
-        # Update weights
-        self.weights_hidden_output += self.learning_rate * \
-            np.dot(output_errors, hidden_outputs.T)
-        self.weights_input_hidden += self.learning_rate * \
-            np.dot(hidden_errors, inputs.T)
+        # Calculate the gradient of the weights between the hidden and output layers
+        # using the chain rule and the derivative of the linear activation function of the output layer
+        gradient_hidden_output = output_errors * hidden_outputs.T
 
-    def predict(self, inputs):
-        inputs = inputs.reshape(((self.input_size, self.output_size)))
-        return self.forward(inputs)[0]
+        # Update the weights between the hidden and output layers by moving in the direction of the negative gradient
+        self.weights_hidden_output += self.learning_rate * gradient_hidden_output
+
+        # Calculate the hidden layer error
+        hidden_errors = np.dot(self.weights_hidden_output.T, output_errors) * hidden_outputs * (1 - hidden_outputs)
+
+        # Calculate the gradient of the weights between the input and hidden layers
+        # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
+        gradient_input_hidden = hidden_errors * inputs.T
+
+        # Update the weights between the input and hidden layers by moving in the direction of the negative gradient
+        self.weights_input_hidden += self.learning_rate * gradient_input_hidden
+
+    def predict(self, input):
+        # Predict the output of a single input
+        input = input.reshape(((self.input_size, self.output_size)))
+        return self.forward(input)[0]
 
 
 if __name__ == "__main__":
@@ -108,12 +120,13 @@ if __name__ == "__main__":
             nn.train(inputs, targets)
 
     # Evaluate on training set
-    y_train_pred = np.array([nn.predict(X_train[i])
-                            for i in range(len(X_train))])
+    y_train_pred = np.array([nn.predict(X_train[i]) for i in range(len(X_train))])
+    # Using the mean squared error as the loss function
     mse_train = np.mean((y_train - y_train_pred) ** 2)
     print("MSE on training set:", mse_train)
 
     # Evaluate on test set
     y_test_pred = np.array([nn.predict(X_test[i]) for i in range(len(X_test))])
+    # Using the mean squared error as the loss function
     mse_test = np.mean((y_test - y_test_pred) ** 2)
     print("MSE on test set:", mse_test)
