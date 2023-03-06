@@ -162,6 +162,7 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
 
     # Implemented the steps of the pseudocode in Figure 19.5 on page 678
     # Some changes due to the node creation and linking above
+    # And also due to the fact that there are only two possible values for each attribute
     if len(examples) == 0:
         # If examples is empty, return the plurality value of parent_examples
         node.value = plurality_value(parent_examples)
@@ -174,9 +175,9 @@ def learn_decision_tree(examples: np.ndarray, attributes: np.ndarray, parent_exa
     else:
         # Choose the attribute with highest importance
         A = importance(attributes, examples, measure)
+
         # Set the node's attribute to the chosen attribute
         node.attribute = A
-        # For each unique value of the chosen attribute
 
         # Using the fact that there are only two possible values for each attribute
         exs1 = [example for example in examples if example[A] == 1]
@@ -220,6 +221,7 @@ if __name__ == '__main__':
 
     visualize = False
 
+    # Run the experiment twice, once with information gain and once with random
     for i in range(2):
         # Set the number of trials to run
         num_trials = 100
