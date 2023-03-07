@@ -81,7 +81,8 @@ class NeuralNetwork:
 
         # Backward pass
         # Calculate output layer error
-        output_errors = targets - final_outputs
+        # The gradient is the derivative of the loss function
+        output_errors = self.loss_derivative(targets, final_outputs)
 
         # Calculate the gradient of the weights between the hidden and output layers
         # Using the chain rule and the derivative of the linear activation function of the output layer
@@ -91,8 +92,7 @@ class NeuralNetwork:
         self.weights_hidden_output += self.learning_rate * gradient_hidden_output
 
         # Calculate the hidden layer error
-        hidden_errors = np.dot(self.weights_hidden_output.T,
-                               output_errors) * hidden_outputs * (1 - hidden_outputs)
+        hidden_errors = np.dot(self.weights_hidden_output.T, output_errors) * hidden_outputs * (1 - hidden_outputs)
 
         # Calculate the gradient of the weights between the input and hidden layers
         # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
@@ -132,6 +132,10 @@ class NeuralNetwork:
     def loss(self, y_true, y_pred):
         # (1/2) * Σ(y_true - y_pred)^2
         return 0.5 * np.sum(np.square(y_true - y_pred))
+    
+    def loss_derivative(self, y_true, y_pred):
+        # Derivative of the loss function
+        return y_true - y_pred
 
     def mse(self, y_true, y_pred):
         # Calculate the mean squared error
@@ -157,14 +161,13 @@ if __name__ == "__main__":
     # Print the history data
     [print(data) for data in history_data]
 
-    # Evaluate on training set
-    y_train_pred = np.array([nn.predict(X_train[i])
-                            for i in range(len(X_train))])
+    # Evaluate on training set on the trained model
+    y_train_pred = np.array([nn.predict(X_train[i]) for i in range(len(X_train))])
     # Using the mean squared error as the loss function
     mse_train = nn.mse(y_train, y_train_pred)
     print("MSE on training set:", mse_train)
 
-    # Evaluate on test set
+    # Evaluate on test set on the trained model
     y_test_pred = np.array([nn.predict(X_test[i]) for i in range(len(X_test))])
     # Using the mean squared error as the loss function
     mse_test = nn.mse(y_test, y_test_pred)
