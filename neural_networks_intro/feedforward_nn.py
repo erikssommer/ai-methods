@@ -42,7 +42,7 @@ class NeuralNetwork:
         # Initialize weights with random values from a normal distribution
         self.weights_input_hidden = np.random.normal(
             0.0, pow(self.input_size, -0.5), (self.hidden_size, self.input_size))
-        self.weights_hidden_output = np.random.normal(
+        self.weights_output_hidden = np.random.normal(
             0.0, pow(self.hidden_size, -0.5), (self.output_size, self.hidden_size))
 
     def sigmoid(self, x):
@@ -59,7 +59,7 @@ class NeuralNetwork:
         hidden_outputs = self.sigmoid(hidden_inputs)
 
         # Calculate the output of the output layer
-        final_inputs = np.dot(self.weights_hidden_output, hidden_outputs)
+        final_inputs = np.dot(self.weights_output_hidden, hidden_outputs)
         final_outputs = self.linear(final_inputs)
 
         return final_outputs
@@ -69,7 +69,7 @@ class NeuralNetwork:
         hidden_inputs = np.dot(self.weights_input_hidden, inputs)
         hidden_outputs = self.sigmoid(hidden_inputs)
 
-        final_inputs = np.dot(self.weights_hidden_output, hidden_outputs)
+        final_inputs = np.dot(self.weights_output_hidden, hidden_outputs)
         final_outputs = self.linear(final_inputs)
 
         # Calculate the loss
@@ -84,10 +84,10 @@ class NeuralNetwork:
         gradient_hidden_output = output_errors * hidden_outputs.T
 
         # Update the weights between the hidden and output layers by moving in the direction of the negative gradient
-        self.weights_hidden_output += self.learning_rate * gradient_hidden_output
+        self.weights_output_hidden += self.learning_rate * gradient_hidden_output
 
         # Calculate the hidden layer error
-        hidden_errors = np.dot(self.weights_hidden_output.T,
+        hidden_errors = np.dot(self.weights_output_hidden.T,
                                output_errors) * hidden_outputs * (1 - hidden_outputs)
 
         # Calculate the gradient of the weights between the input and hidden layers
