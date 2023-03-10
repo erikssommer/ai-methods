@@ -1,14 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-""" 
-Implement a feedforward neural network with one hidden layer that supports regression. The neural network needs to take two input features. The hidden layer needs to support the sigmoid activation function with two units. Finally, the output layer with one unit. To train the neural network with one hidden layer, implement the gradient descent algorithm with a loss function and its derivative. Implement the mean squared error you get on the training and test set using the trained model. The training input has the format X_train = [[ 0.09762701 0.43037873][0.20552675 0.08976637][-0.1526904 0.29178823]], and the targets have the format y_train = [0.06759077 0.09010412 0.06689603]
-"""
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-
 
 def func(X: np.ndarray) -> np.ndarray:
     """
@@ -76,31 +68,32 @@ class NeuralNetwork:
     def train(self, input, target):
         hidden_layer, output_layer = self.forward_pass(input)
 
+        # Reshape the target to match the output layer
         target = target.reshape((len(target), 1))
 
         # Backward pass
         # Calculate output layer error
         # The gradient is the derivative of the loss function
-        d_output = self.loss_derivative(target, output_layer)
+        output_error = self.loss_derivative(target, output_layer)
 
-        # Calculate the gradient of the weights between the hidden and output layers
+        # Calculate the gradient of the weights and biases between the hidden and output layers
         # Using the chain rule and the derivative of the linear activation function of the output layer
-        d_weights_output = np.dot(hidden_layer.T, d_output)
-        d_bias_output = np.sum(d_output)
+        gradient_weights_output = np.dot(hidden_layer.T, output_error)
+        gradient_bias_output = np.sum(output_error)
 
         # Calculate hidden layer error
-        d_hidden = np.dot(d_output, self.output_weight.T) * hidden_layer * (1 - hidden_layer)
+        hidden_error = np.dot(output_error, self.output_weight.T) * hidden_layer * (1 - hidden_layer)
 
-        # Calculate the gradient of the weights between the input and hidden layers
+        # Calculate the gradient of the weights and biases between the input and hidden layers
         # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
-        d_weights_hidden = np.dot(input.T, d_hidden)
-        d_bias_hidden = np.sum(d_hidden, axis=0)
+        gradient_weights_hidden = np.dot(input.T, hidden_error)
+        gradient_bias_hidden = np.sum(hidden_error, axis=0)
 
         # Update weights and biases using gradient descent moving in the direction of the gradient
-        self.input_weight -= self.learning_rate * d_weights_hidden
-        self.input_bias -= self.learning_rate * d_bias_hidden
-        self.output_weight -= self.learning_rate * d_weights_output
-        self.output_bias -= self.learning_rate * d_bias_output
+        self.input_weight -= self.learning_rate * gradient_weights_hidden
+        self.input_bias -= self.learning_rate * gradient_bias_hidden
+        self.output_weight -= self.learning_rate * gradient_weights_output
+        self.output_bias -= self.learning_rate * gradient_bias_output
 
         return target
 
@@ -109,6 +102,7 @@ class NeuralNetwork:
             target = self.train(input, target)
             _, y_pred = self.forward_pass(input)
             
+            # Printting the training history
             if (i+1) % 10000 == 0:
                 print(f"Epoch: {i+1}, Loss: {self.loss(target, y_pred)}")
 
