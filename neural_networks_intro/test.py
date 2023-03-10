@@ -9,6 +9,7 @@ Implement a feedforward neural network with one hidden layer that supports regre
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def func(X: np.ndarray) -> np.ndarray:
     """
     The data generating function.
@@ -50,14 +51,14 @@ class NeuralNetwork:
     def sigmoid(self, x):
         # Activation function for the hidden layer
         return 1 / (1 + np.exp(-x))
-    
+
     def linear(self, x):
         # Activation function for the output layer
         return x
 
     def loss(self, target, output):
         return np.mean(np.square(target - output))
-    
+
     def loss_derivative(self, y_true, y_pred):
         return 2 * (y_pred - y_true)
 
@@ -71,36 +72,50 @@ class NeuralNetwork:
         final_output = self.linear(final_inputs)
 
         return hidden_outputs, final_output
-        
 
-    def train(self, input, target, epochs):
+    def train(self, input, target):
+        hidden_layer, output_layer = self.forward_pass(input)
+
+        target = target.reshape((len(target), 1))
+
+        # Backward pass
+        # Calculate output layer error
+        # The gradient is the derivative of the loss function
+        d_output = self.loss_derivative(target, output_layer)
+
+        # Calculate the gradient of the weights between the hidden and output layers
+        # Using the chain rule and the derivative of the linear activation function of the output layer
+        d_weights_output = np.dot(hidden_layer.T, d_output)
+        d_bias_output = np.sum(d_output)
+
+        # Calculate hidden layer error
+        d_hidden = np.dot(d_output, self.output_weight.T) * hidden_layer * (1 - hidden_layer)
+
+        # Calculate the gradient of the weights between the input and hidden layers
+        # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
+        d_weights_hidden = np.dot(input.T, d_hidden)
+        d_bias_hidden = np.sum(d_hidden, axis=0)
+
+        # Update weights and biases using gradient descent moving in the direction of the gradient
+        self.input_weight -= self.learning_rate * d_weights_hidden
+        self.input_bias -= self.learning_rate * d_bias_hidden
+        self.output_weight -= self.learning_rate * d_weights_output
+        self.output_bias -= self.learning_rate * d_bias_output
+
+        return target
+
+    def fit(self, input, target, epochs):
         for i in range(epochs):
-            hidden_layer, output_layer = self.forward_pass(input)
-
-            target = target.reshape((len(target), 1))
-
-            d_output = self.loss_derivative(target, output_layer)
-
-            d_weights_output = np.dot(hidden_layer.T, d_output)
-            d_bias_output = np.sum(d_output)
-
-            d_hidden = np.dot(d_output, self.output_weight.T) * hidden_layer * (1 - hidden_layer)
-            d_weights_hidden = np.dot(input.T, d_hidden)
-            d_bias_hidden = np.sum(d_hidden, axis=0)
-
-            self.input_weight -= self.learning_rate * d_weights_hidden
-            self.input_bias -= self.learning_rate * d_bias_hidden
-            self.output_weight -= self.learning_rate * d_weights_output
-            self.output_bias -= self.learning_rate * d_bias_output
-
+            target = self.train(input, target)
             _, y_pred = self.forward_pass(input)
+            
             if (i+1) % 10000 == 0:
-                print("Epoch:", i+1, "Loss:", self.loss(target, y_pred))
+                print(f"Epoch: {i+1}, Loss: {self.loss(target, y_pred)}")
 
         return y_pred
-    
-    def predict(self, x):
-        _, y_pred = self.forward_pass(x)
+
+    def predict(self, input):
+        _, y_pred = self.forward_pass(input)
         return y_pred
 
 
@@ -121,27 +136,20 @@ if __name__ == "__main__":
     y_train_pred = nn.predict(X_train)
     y_test_pred = nn.predict(X_test)
 
-    # Print loss before training
-    print("Train loss:", nn.loss(y_train, y_train_pred))
-    print("Test loss:", nn.loss(y_test, y_test_pred))
+    # Print mse before training
+    print("Mean squared error before training:")
+    print("MSE on training set:", nn.loss(y_train, y_train_pred))
+    print("MSE on test set:", nn.loss(y_test, y_test_pred))
 
-    nn.train(X_train, y_train, n_epochs)
+    # Train the neural network
+    print("\nTraining...")
+    nn.fit(X_train, y_train, n_epochs)
 
     # Predict after training
     y_train_pred = nn.predict(X_train)
     y_test_pred = nn.predict(X_test)
 
-    # Print loss after training
-    print("Train loss:", nn.loss(y_train, y_train_pred))
-    print("Test loss:", nn.loss(y_test, y_test_pred))
-
-    plt.scatter(y_test, y_test_pred)
-    plt.xlabel('Actual values')
-    plt.ylabel('Predicted values')
-    plt.show()
-
-    plt.scatter(range(len(y_test)), y_test)
-    plt.scatter(range(len(y_test_pred)), y_test_pred, color='red')
-    plt.xlabel('Index')
-    plt.ylabel('Predictions')
-    plt.show()
+    # Print mse after training
+    print("\nMean squared error after training:")
+    print("MSE on training set:", nn.loss(y_train, y_train_pred))
+    print("MSE on test set:", nn.loss(y_test, y_test_pred))
