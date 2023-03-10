@@ -107,7 +107,14 @@ if __name__ == "__main__":
     np.random.seed(0)
     X_train, y_train, X_test, y_test = get_data(n_train=280, n_test=120)
 
-    nn = NeuralNetwork(input_dim=2, hidden_dim=2, output_dim=1, learning_rate=0.0001)
+    # Hyperparameters
+    input_dim = 2
+    hidden_dim = 2
+    output_dim = 1
+    learning_rate = 0.0001
+    n_epochs = 100000
+
+    nn = NeuralNetwork(input_dim, hidden_dim, output_dim, learning_rate)
 
     # Predict before training
     y_train_pred = nn.predict(X_train)
@@ -117,7 +124,7 @@ if __name__ == "__main__":
     print("Train loss:", nn.loss(y_train, y_train_pred))
     print("Test loss:", nn.loss(y_test, y_test_pred))
 
-    nn.train(X_train, y_train, epochs=100000)
+    nn.train(X_train, y_train, n_epochs)
 
     # Predict after training
     y_train_pred = nn.predict(X_train)
