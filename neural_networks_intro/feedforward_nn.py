@@ -131,11 +131,11 @@ class NeuralNetwork:
 
     def loss(self, y_true, y_pred):
         # (1/2) * Σ(y_true - y_pred)^2
-        return 0.5 * np.sum(np.square(y_true - y_pred))
+        return np.mean(np.square(y_true - y_pred))
     
     def loss_derivative(self, y_true, y_pred):
         # Derivative of the loss function
-        return y_true - y_pred
+        return 2 * (y_true - y_pred)
 
     def mse(self, y_true, y_pred):
         # Calculate the mean squared error
@@ -150,8 +150,8 @@ if __name__ == "__main__":
     input_size = 2
     hidden_size = 2
     output_size = 1
-    learning_rate = 0.1
-    n_epochs = 1000
+    learning_rate = 0.01
+    n_epochs = 10000
 
     # Create neural network
     nn = NeuralNetwork(input_size, hidden_size, output_size, learning_rate)
