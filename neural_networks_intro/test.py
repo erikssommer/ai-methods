@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def func(X: np.ndarray) -> np.ndarray:
@@ -35,6 +34,8 @@ def get_data(n_train: int, n_test: int) -> tuple[np.ndarray, np.ndarray, np.ndar
 class NeuralNetwork:
     def __init__(self, input_dim, hidden_dim, output_dim, learning_rate):
         self.learning_rate = learning_rate
+
+        # Initialize weights with random values from a normal distribution
         self.input_weight = np.random.normal(size=(input_dim, hidden_dim))
         self.output_weight = np.random.normal(size=(hidden_dim, output_dim))
         self.input_bias = np.random.normal(size=(1, hidden_dim))
