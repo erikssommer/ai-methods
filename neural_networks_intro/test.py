@@ -47,9 +47,6 @@ class NeuralNetwork:
         self.input_bias = np.random.normal(size=(1, hidden_dim))
         self.output_bias = np.random.normal(size=(1, output_dim))
 
-    def perceptron(self, x):
-        return np.dot(x, self.input_weight) + self.input_bias
-
     def sigmoid(self, x):
         # Activation function for the hidden layer
         return 1 / (1 + np.exp(-x))
@@ -65,11 +62,15 @@ class NeuralNetwork:
         return 2 * (y_pred - y_true)
 
     def forward_pass(self, x):
-        hidden_layer = self.sigmoid(self.perceptron(x))
-        output_layer = np.dot(hidden_layer, self.output_weight) + self.output_bias
-        final_output = self.linear(output_layer)
+        # Calculate the output of the hidden layer
+        hidden_inputs = np.dot(x, self.input_weight) + self.input_bias
+        hidden_outputs = self.sigmoid(hidden_inputs)
 
-        return hidden_layer, final_output
+        # Calculate the output of the output layer
+        final_inputs = np.dot(hidden_outputs, self.output_weight) + self.output_bias
+        final_output = self.linear(final_inputs)
+
+        return hidden_outputs, final_output
         
 
     def train(self, input, target, epochs):
