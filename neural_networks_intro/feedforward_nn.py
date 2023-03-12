@@ -55,9 +55,9 @@ class FeedforwardNeuralNetwork:
         """Mean squared error loss function"""
         return np.mean(np.square(target - output))
 
-    def loss_derivative(self, y_true, y_pred):
+    def loss_derivative(self, target, output):
         """Derivative of the mean squared error loss function"""
-        return 2 * (y_pred - y_true)
+        return 2 * (target - output)
 
     def forward(self, x):
         """Forward pass"""
@@ -66,8 +66,7 @@ class FeedforwardNeuralNetwork:
         hidden_outputs = self.sigmoid(hidden_inputs)
 
         # Calculate the output of the output layer
-        final_inputs = np.dot(
-            hidden_outputs, self.weights_hidden_output) + self.bias_output
+        final_inputs = np.dot(hidden_outputs, self.weights_hidden_output) + self.bias_output
         final_output = self.linear(final_inputs)
 
         return hidden_outputs, final_output
@@ -82,21 +81,20 @@ class FeedforwardNeuralNetwork:
         # Backward pass
         # Calculate output layer error
         # The gradient is the derivative of the loss function
-        output_error = self.loss_derivative(target, output_layer)
-
-        # Calculate the gradient of the weights and biases between the hidden and output layers
-        # Using the chain rule and the derivative of the linear activation function of the output layer
-        gradient_weights_output = np.dot(hidden_layer.T, output_error)
-        gradient_bias_output = np.sum(output_error)
+        output_error = self.loss_derivative(output_layer, target)
 
         # Calculate hidden layer error
-        hidden_error = np.dot(
-            output_error, self.weights_hidden_output.T) * hidden_layer * (1 - hidden_layer)
+        hidden_error = np.dot(output_error, self.weights_hidden_output.T) * hidden_layer * (1 - hidden_layer)
 
         # Calculate the gradient of the weights and biases between the input and hidden layers
         # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
         gradient_weights_hidden = np.dot(input.T, hidden_error)
         gradient_bias_hidden = np.sum(hidden_error, axis=0)
+
+        # Calculate the gradient of the weights and biases between the hidden and output layers
+        # Using the chain rule and the derivative of the linear activation function of the output layer
+        gradient_weights_output = np.dot(hidden_layer.T, output_error)
+        gradient_bias_output = np.sum(output_error)
 
         # Update weights and biases using gradient descent moving in the direction of the gradient
         self.weights_input_hidden -= self.learning_rate * gradient_weights_hidden
@@ -119,8 +117,8 @@ class FeedforwardNeuralNetwork:
 
     def predict(self, input):
         """Predict the output for the given input"""
-        _, y_pred = self.forward(input)
-        return y_pred
+        _, pred = self.forward(input)
+        return pred
 
 
 if __name__ == "__main__":
@@ -134,9 +132,10 @@ if __name__ == "__main__":
     learning_rate = 0.0001
     n_epochs = 100000
 
+    # Initialize the neural network
     fnn = FeedforwardNeuralNetwork(input_dim, hidden_dim, output_dim, learning_rate)
 
-    # Predict before training
+    # Predict before training to see how the network performs
     y_train_pred = fnn.predict(X_train)
     y_test_pred = fnn.predict(X_test)
 
@@ -149,7 +148,7 @@ if __name__ == "__main__":
     print("\nTraining...")
     fnn.fit(X_train, y_train, n_epochs)
 
-    # Predict after training
+    # Predict after training to see the improvement
     y_train_pred = fnn.predict(X_train)
     y_test_pred = fnn.predict(X_test)
 
