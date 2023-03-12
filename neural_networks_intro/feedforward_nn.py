@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def func(X: np.ndarray) -> np.ndarray:
@@ -32,114 +31,96 @@ def get_data(n_train: int, n_test: int) -> tuple[np.ndarray, np.ndarray, np.ndar
     return X_train, y_train, X_test, y_test
 
 
-class NeuralNetwork:
-    def __init__(self, input_size, hidden_size, output_size, learning_rate):
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.output_size = output_size
+class FeedforwardNeuralNetwork:
+    """Feedforward neural network with one hidden layer"""
+
+    def __init__(self, input_dim, hidden_dim, output_dim, learning_rate):
         self.learning_rate = learning_rate
 
-        # Initialize weights with random values from a normal distribution
-        self.weights_input_hidden = np.random.normal(
-            0.0, pow(self.input_size, -0.5), (self.hidden_size, self.input_size))
-        self.weights_hidden_output = np.random.normal(
-            0.0, pow(self.hidden_size, -0.5), (self.output_size, self.hidden_size))
-        
-        # Initialize bias terms with zeros
-        self.bias_hidden = np.zeros((self.hidden_size, 1))
-        self.bias_output = np.zeros((self.output_size, 1))
+        # Initialize weights and biases with random values from a normal distribution
+        self.weights_input_hidden = np.random.normal(size=(input_dim, hidden_dim))
+        self.weights_hidden_output = np.random.normal(size=(hidden_dim, output_dim))
+        self.bias_hidden = np.random.normal(size=(1, hidden_dim))
+        self.bias_output = np.random.normal(size=(1, output_dim))
 
     def sigmoid(self, x):
-        # Activation function for the hidden layer
+        """Activation function for the hidden layer"""
         return 1 / (1 + np.exp(-x))
 
     def linear(self, x):
-        # Activation function for the output layer
+        """Activation function for the output layer"""
         return x
 
-    def forward(self, inputs):
+    def loss(self, target, output):
+        """Mean squared error loss function"""
+        return np.mean(np.square(target - output))
+
+    def loss_derivative(self, y_true, y_pred):
+        """Derivative of the mean squared error loss function"""
+        return 2 * (y_pred - y_true)
+
+    def forward(self, x):
+        """Forward pass"""
         # Calculate the output of the hidden layer
-        hidden_inputs = np.dot(self.weights_input_hidden, inputs) + self.bias_hidden
+        hidden_inputs = np.dot(x, self.weights_input_hidden) + self.bias_hidden
         hidden_outputs = self.sigmoid(hidden_inputs)
 
         # Calculate the output of the output layer
-        final_inputs = np.dot(self.weights_hidden_output, hidden_outputs) + self.bias_output
-        final_outputs = self.linear(final_inputs)
+        final_inputs = np.dot(
+            hidden_outputs, self.weights_hidden_output) + self.bias_output
+        final_output = self.linear(final_inputs)
 
-        return final_outputs
+        return hidden_outputs, final_output
 
-    def train(self, inputs, targets):
-        # Forward pass
-        hidden_inputs = np.dot(self.weights_input_hidden, inputs) + self.bias_hidden
-        hidden_outputs = self.sigmoid(hidden_inputs)
+    def train_step(self, input, target):
+        """Train step for learning the weights and biases"""
+        hidden_layer, output_layer = self.forward(input)
 
-        final_inputs = np.dot(self.weights_hidden_output, hidden_outputs) + self.bias_output
-        final_outputs = self.linear(final_inputs)
-
-        # Calculate the loss
-        loss = self.loss(targets, final_outputs)
+        # Reshape the target to match the output layer
+        target = target.reshape((len(target), 1))
 
         # Backward pass
         # Calculate output layer error
         # The gradient is the derivative of the loss function
-        output_errors = self.loss_derivative(targets, final_outputs)
+        output_error = self.loss_derivative(target, output_layer)
 
-        # Calculate the gradient of the weights between the hidden and output layers
+        # Calculate the gradient of the weights and biases between the hidden and output layers
         # Using the chain rule and the derivative of the linear activation function of the output layer
-        gradient_hidden_output = output_errors * hidden_outputs.T
+        gradient_weights_output = np.dot(hidden_layer.T, output_error)
+        gradient_bias_output = np.sum(output_error)
 
-        # Update the weights between the hidden and output layers by moving in the direction of the negative gradient
-        self.weights_hidden_output += self.learning_rate * gradient_hidden_output
+        # Calculate hidden layer error
+        hidden_error = np.dot(
+            output_error, self.weights_hidden_output.T) * hidden_layer * (1 - hidden_layer)
 
-        # Calculate the hidden layer error
-        hidden_errors = np.dot(self.weights_hidden_output.T, output_errors) * hidden_outputs * (1 - hidden_outputs)
-
-        # Calculate the gradient of the weights between the input and hidden layers
+        # Calculate the gradient of the weights and biases between the input and hidden layers
         # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
-        gradient_input_hidden = hidden_errors * inputs.T
+        gradient_weights_hidden = np.dot(input.T, hidden_error)
+        gradient_bias_hidden = np.sum(hidden_error, axis=0)
 
-        # Update the weights between the input and hidden layers by moving in the direction of the negative gradient
-        self.weights_input_hidden += self.learning_rate * gradient_input_hidden
+        # Update weights and biases using gradient descent moving in the direction of the gradient
+        self.weights_input_hidden -= self.learning_rate * gradient_weights_hidden
+        self.bias_hidden -= self.learning_rate * gradient_bias_hidden
+        self.weights_hidden_output -= self.learning_rate * gradient_weights_output
+        self.bias_output -= self.learning_rate * gradient_bias_output
 
-        # Update the bias
-        self.bias_hidden += self.learning_rate * hidden_errors
-        self.bias_output += self.learning_rate * output_errors
+        # Return the target to match the output layer for the loss function
+        return target
 
-        # Return the loss
-        return loss
+    def fit(self, input, target, epochs):
+        """Train the neural network"""
+        for i in range(epochs):
+            target = self.train_step(input, target)
+            _, y_pred = self.forward(input)
+
+            # Print the loss every 10% of the epochs
+            if (i+1) % (epochs // 10) == 0:
+                print(f"Epoch: {i+1}, Loss: {self.loss(target, y_pred)}")
 
     def predict(self, input):
-        # Predict the output of a single input
-        input = input.reshape(((self.input_size, self.output_size)))
-        return self.forward(input)[0]
-    
-    def fit(self, X, y, n_epochs):
-        training_history = []
-
-        # Train the neural network
-        for i in range(n_epochs):
-            for j in range(len(X)):
-                inputs = X[j].reshape((self.input_size, self.output_size))
-                targets = y[j]
-
-                loss = self.train(inputs, targets)
-
-            if i % 100 == 0 and i != 0:
-                training_history.append(f"Epoch: {i}, Loss: {loss}")
-        
-        return training_history
-
-    def loss(self, y_true, y_pred):
-        # (1/2) * Σ(y_true - y_pred)^2
-        return np.mean(np.square(y_true - y_pred))
-    
-    def loss_derivative(self, y_true, y_pred):
-        # Derivative of the loss function
-        return 2 * (y_true - y_pred)
-
-    def mse(self, y_true, y_pred):
-        # Calculate the mean squared error
-        return np.mean(((y_true - y_pred) ** 2))
+        """Predict the output for the given input"""
+        _, y_pred = self.forward(input)
+        return y_pred
 
 
 if __name__ == "__main__":
@@ -147,28 +128,32 @@ if __name__ == "__main__":
     X_train, y_train, X_test, y_test = get_data(n_train=280, n_test=120)
 
     # Hyperparameters
-    input_size = 2
-    hidden_size = 2
-    output_size = 1
-    learning_rate = 0.01
-    n_epochs = 10000
+    input_dim = 2
+    hidden_dim = 2
+    output_dim = 1
+    learning_rate = 0.0001
+    n_epochs = 100000
 
-    # Create neural network
-    nn = NeuralNetwork(input_size, hidden_size, output_size, learning_rate)
+    fnn = FeedforwardNeuralNetwork(input_dim, hidden_dim, output_dim, learning_rate)
 
-    history_data = nn.fit(X_train, y_train, n_epochs)
+    # Predict before training
+    y_train_pred = fnn.predict(X_train)
+    y_test_pred = fnn.predict(X_test)
 
-    # Print the history data
-    [print(data) for data in history_data]
+    # Print mse before training
+    print("Mean squared error before training:")
+    print("MSE on training set:", fnn.loss(y_train, y_train_pred))
+    print("MSE on test set:", fnn.loss(y_test, y_test_pred))
 
-    # Evaluate on training set on the trained model
-    y_train_pred = np.array([nn.predict(X_train[i]) for i in range(len(X_train))])
-    # Using the mean squared error as the loss function
-    mse_train = nn.mse(y_train, y_train_pred)
-    print("MSE on training set:", mse_train)
+    # Train the neural network
+    print("\nTraining...")
+    fnn.fit(X_train, y_train, n_epochs)
 
-    # Evaluate on test set on the trained model
-    y_test_pred = np.array([nn.predict(X_test[i]) for i in range(len(X_test))])
-    # Using the mean squared error as the loss function
-    mse_test = nn.mse(y_test, y_test_pred)
-    print("MSE on test set:", mse_test)
+    # Predict after training
+    y_train_pred = fnn.predict(X_train)
+    y_test_pred = fnn.predict(X_test)
+
+    # Print mse after training
+    print("\nMean squared error after training:")
+    print("MSE on training set:", fnn.loss(y_train, y_train_pred))
+    print("MSE on test set:", fnn.loss(y_test, y_test_pred))
