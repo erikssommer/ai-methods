@@ -87,12 +87,10 @@ class FeedforwardNeuralNetwork:
         hidden_error = np.dot(output_error, self.weights_hidden_output.T) * hidden_layer * (1 - hidden_layer)
 
         # Calculate the gradient of the weights and biases between the input and hidden layers
-        # Using the chain rule and the derivative of the sigmoid activation function of the hidden layer
         gradient_weights_hidden = np.dot(input.T, hidden_error)
         gradient_bias_hidden = np.sum(hidden_error, axis=0)
 
         # Calculate the gradient of the weights and biases between the hidden and output layers
-        # Using the chain rule and the derivative of the linear activation function of the output layer
         gradient_weights_output = np.dot(hidden_layer.T, output_error)
         gradient_bias_output = np.sum(output_error)
 
