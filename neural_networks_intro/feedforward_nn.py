@@ -109,11 +109,11 @@ class FeedforwardNeuralNetwork:
         """Train the neural network"""
         for i in range(epochs):
             target = self.train_step(input, target)
-            _, y_pred = self.forward(input)
+            _, pred = self.forward(input)
 
             # Print the loss every 10% of the epochs
             if (i+1) % (epochs // 10) == 0:
-                print(f"Epoch: {i+1}, Loss: {self.loss(target, y_pred)}")
+                print(f"Epoch: {i+1}, Loss: {self.loss(target, pred)}")
 
     def predict(self, input):
         """Predict the output for the given input"""
