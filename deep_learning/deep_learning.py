@@ -21,10 +21,9 @@ def preprocess_data(data: Dict[str, Union[List[Any], int]]) -> Dict[str, Union[L
     """
 
     # Find the average length of the training data
-    lengths = [len(i) for i in data["x_train"]]
-    avg = round(sum(lengths) / len(lengths))
+    avg_length = sum(len(i) for i in data["x_train"]) // len(data["x_train"])
 
-    maxlen = avg #data["max_length"]//16
+    maxlen = avg_length  # data["max_length"]//16
     data["x_train"] = pad_sequences(data['x_train'], maxlen=maxlen)
     data["y_train"] = np.asarray(data['y_train'])
     data["x_test"] = pad_sequences(data['x_test'], maxlen=maxlen)
@@ -46,7 +45,8 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
 
     # Create the model and add common layer
     model = keras.Sequential()
-    model.add(keras.layers.Embedding(input_dim=data["vocab_size"], output_dim=64, input_length=data["x_train"].shape[1]))
+    model.add(keras.layers.Embedding(
+        input_dim=data["vocab_size"], output_dim=64, input_length=data["x_train"].shape[1]))
 
     # Build the model given model_type
     if model_type == "feedforward":
@@ -55,14 +55,16 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
         model.add(keras.layers.Dense(units=16, activation='relu'))
         model.add(keras.layers.Dense(units=2, activation='softmax'))
     elif model_type == "recurrent":
-        model.add(keras.layers.LSTM(units=32, recurrent_activation='sigmoid', dropout=0.2))
+        model.add(keras.layers.LSTM(
+            units=32, recurrent_activation='sigmoid', dropout=0.2))
         model.add(keras.layers.Dense(units=16, activation='relu'))
         model.add(keras.layers.Dense(units=2, activation='softmax'))
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
     # Train the model on (data["x_train"], data["y_train"])
     model.fit(data["x_train"], data["y_train"], epochs=1, verbose=1)
 
