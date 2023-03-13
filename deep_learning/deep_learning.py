@@ -6,7 +6,6 @@ from tensorflow import keras
 from keras.utils import pad_sequences
 
 
-
 def load_data() -> Dict[str, Union[List[Any], int]]:
     path = "keras-data.pickle"
     with open(file=path, mode="rb") as file:
@@ -20,7 +19,12 @@ def preprocess_data(data: Dict[str, Union[List[Any], int]]) -> Dict[str, Union[L
     Preprocesses the data dictionary. Both the training-data and the test-data must be padded
     to the same length; play around with the maxlen parameter to trade off speed and accuracy.
     """
-    maxlen = data["max_length"]//16
+
+    # Find the average length of the training data
+    lengths = [len(i) for i in data["x_train"]]
+    avg = round(sum(lengths) / len(lengths))
+
+    maxlen = avg #data["max_length"]//16
     data["x_train"] = pad_sequences(data['x_train'], maxlen=maxlen)
     data["y_train"] = np.asarray(data['y_train'])
     data["x_test"] = pad_sequences(data['x_test'], maxlen=maxlen)
@@ -40,14 +44,33 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     :return: The accuracy of the model on test data
     """
 
-    # TODO build the model given model_type, train it on (data["x_train"], data["y_train"])
-    #  and evaluate its accuracy on (data["x_test"], data["y_test"]). Return the accuracy
+    # Create the model and add common layer
+    model = keras.Sequential()
+    model.add(keras.layers.Embedding(input_dim=data["vocab_size"], output_dim=64, input_length=data["x_train"].shape[1]))
 
-    pass
+    # Build the model given model_type
+    if model_type == "feedforward":
+        model.add(keras.layers.Flatten())
+        model.add(keras.layers.Dense(units=32, activation='relu'))
+        model.add(keras.layers.Dense(units=16, activation='relu'))
+        model.add(keras.layers.Dense(units=2, activation='softmax'))
+    elif model_type == "recurrent":
+        model.add(keras.layers.LSTM(units=32, recurrent_activation='sigmoid', dropout=0.2))
+        model.add(keras.layers.Dense(units=16, activation='relu'))
+        model.add(keras.layers.Dense(units=2, activation='softmax'))
+    else:
+        raise ValueError(f"Unknown model type: {model_type}")
 
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    
+    # Train the model on (data["x_train"], data["y_train"])
+    model.fit(data["x_train"], data["y_train"], epochs=1, verbose=1)
 
+    # Evaluate the models accuracy on (data["x_test"], data["y_test"])
+    _, test_acc = model.evaluate(data["x_test"], data["y_test"], verbose=1)
 
-
+    # Return the accuracy of the model on test data
+    return test_acc
 
 
 def main() -> None:
@@ -63,7 +86,6 @@ def main() -> None:
     rnn_test_accuracy = train_model(keras_data, model_type="recurrent")
     print('Model: Recurrent NN.\n'
           f'Test accuracy: {rnn_test_accuracy:.3f}')
-
 
 
 if __name__ == '__main__':
