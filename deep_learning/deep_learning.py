@@ -48,14 +48,14 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     input_dim = data["vocab_size"]
     hidden_dim = 64
     output_dim = 1
-    epochs = 2
+    activation_fnn = 'relu'
+    activation_rnn = ['sigmoid', 'relu']
+    recurrent_activation_rnn = 'tanh'
+    output_activation = 'sigmoid'
     loss = 'binary_crossentropy'
     optimizer = 'adam'
     metrics = ['accuracy']
-    activation_fnn = 'relu'
-    activation_rnn = ['sigmoid', 'relu']
-    output_activation = 'sigmoid'
-    recurrent_activation_rnn = 'tanh'
+    epochs = 2
 
     # Create the model and add common layer for both feedforward and recurrent network
     model = keras.Sequential()
