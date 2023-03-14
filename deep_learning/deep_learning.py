@@ -59,14 +59,17 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     epochs = 2
     dropout = 0.2
 
-    # Create the model and add common layer for both feedforward and recurrent network
+    # Create the model
     model = keras.Sequential()
+
+    # Add common layer for both feedforward and recurrent network
     model.add(
         keras.layers.Embedding(
             input_dim=input_dim,
             output_dim=hidden_dim,
             input_length=input_length
-        ))
+        )
+    )
 
     # Build the model given model_type
     if model_type == "feedforward":
@@ -78,7 +81,8 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
                 keras.layers.Dense(
                     units=hidden_dim,
                     activation=activation_fnn
-                ))
+                )
+            )
     elif model_type == "recurrent":
         # Using LSTM layer for recurrent network
         model.add(
@@ -87,13 +91,17 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
                 activation=activation_rnn[0],
                 recurrent_activation=recurrent_activation_rnn,
                 dropout=dropout
-            ))
+            )
+        )
+
+        # Adding the dense layers
         for _ in range(hidden_layers - 1):
             model.add(
                 keras.layers.Dense(
                     units=hidden_dim,
                     activation=activation_rnn[1]
-                ))
+                )
+            )
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
@@ -104,12 +112,13 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
         keras.layers.Dense(
             units=output_dim,
             activation=output_activation
-        ))
+        )
+    )
 
     # Choosing hyperparameters that optimizes the model for binary classification
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    # Train the model on train data
+    # Train the model on training data
     model.fit(data["x_train"], data["y_train"], epochs=epochs)
 
     # Evaluate the models accuracy on test data
