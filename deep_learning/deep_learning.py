@@ -50,6 +50,7 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
 
     # Build the model given model_type
     if model_type == "feedforward":
+        # Flatten the output of the embedding layer to feed it into the dense layers
         model.add(keras.layers.Flatten())
         # Using only dense layers for feedforward network
         model.add(keras.layers.Dense(units=64, activation='relu'))
@@ -69,8 +70,7 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     model.add(keras.layers.Dense(units=1, activation='sigmoid'))
 
     # Choosing hyperparameters that optimizes the model for binary classification
-    model.compile(optimizer='adam',
-                  loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
     # Train the model on train data
     model.fit(data["x_train"], data["y_train"], epochs=1, verbose=1)
