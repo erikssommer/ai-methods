@@ -43,32 +43,39 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     :return: The accuracy of the model on test data
     """
 
-    # Create the model and add common layer
+    # Create the model and add common layer for both feedforward and recurrent network
     model = keras.Sequential()
     model.add(keras.layers.Embedding(
-        input_dim=data["vocab_size"], output_dim=64, input_length=data["x_train"].shape[1]))
+        input_dim=data["vocab_size"], output_dim=128, input_length=data["x_train"].shape[1]))
 
     # Build the model given model_type
     if model_type == "feedforward":
         model.add(keras.layers.Flatten())
-        model.add(keras.layers.Dense(units=32, activation='relu'))
+        # Using only dense layers for feedforward network
+        model.add(keras.layers.Dense(units=64, activation='relu'))
+        model.add(keras.layers.Dense(units=64, activation='relu'))
         model.add(keras.layers.Dense(units=16, activation='relu'))
-        model.add(keras.layers.Dense(units=2, activation='softmax'))
     elif model_type == "recurrent":
+        # Using LSTM layer for recurrent network
         model.add(keras.layers.LSTM(
-            units=32, recurrent_activation='sigmoid', dropout=0.2))
+            units=64, activation='sigmoid', recurrent_activation='tanh', dropout=0.2))
         model.add(keras.layers.Dense(units=16, activation='relu'))
-        model.add(keras.layers.Dense(units=2, activation='softmax'))
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
-    model.compile(optimizer='adam',
-                  loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    # Defining the output layer
+    # Using sigmoid activation function for both feedforward and recurrent network
+    # This is due to the fact that the output is binary
+    model.add(keras.layers.Dense(units=1, activation='sigmoid'))
 
-    # Train the model on (data["x_train"], data["y_train"])
+    # Choosing hyperparameters that optimizes the model for binary classification
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy', metrics=['accuracy'])
+
+    # Train the model on train data
     model.fit(data["x_train"], data["y_train"], epochs=1, verbose=1)
 
-    # Evaluate the models accuracy on (data["x_test"], data["y_test"])
+    # Evaluate the models accuracy on test data
     _, test_acc = model.evaluate(data["x_test"], data["y_test"], verbose=1)
 
     # Return the accuracy of the model on test data
