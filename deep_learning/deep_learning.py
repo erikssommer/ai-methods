@@ -44,20 +44,22 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     """
 
     # Hyperparameters
+    input_length = data["x_train"].shape[1]
+    input_dim = data["vocab_size"]
     hidden_dim = 64
     output_dim = 1
+    epochs = 2
     loss = 'binary_crossentropy'
     optimizer = 'adam'
     metrics = ['accuracy']
     activation_fnn = 'relu'
-    activation_rnn = 'sigmoid'
-    recurrent_activation_rnn = 'tanh'
+    activation_rnn = ['sigmoid', 'relu']
     output_activation = 'sigmoid'
-    epochs = 1
+    recurrent_activation_rnn = 'tanh'
 
     # Create the model and add common layer for both feedforward and recurrent network
     model = keras.Sequential()
-    model.add(keras.layers.Embedding(input_dim=data["vocab_size"], output_dim=hidden_dim, input_length=data["x_train"].shape[1]))
+    model.add(keras.layers.Embedding(input_dim=input_dim, output_dim=hidden_dim, input_length=input_length))
 
     # Build the model given model_type
     if model_type == "feedforward":
@@ -68,9 +70,8 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
         model.add(keras.layers.Dense(units=hidden_dim, activation=activation_fnn))
     elif model_type == "recurrent":
         # Using LSTM layer for recurrent network
-        model.add(keras.layers.LSTM(
-            units=hidden_dim, activation=activation_rnn, recurrent_activation=recurrent_activation_rnn, dropout=0.2))
-        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_rnn))
+        model.add(keras.layers.LSTM(units=hidden_dim, activation=activation_rnn[0], recurrent_activation=recurrent_activation_rnn))
+        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_rnn[1]))
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
