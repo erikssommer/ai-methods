@@ -43,40 +43,50 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     :return: The accuracy of the model on test data
     """
 
+    # Hyperparameters
+    hidden_dim = 64
+    output_dim = 1
+    loss = 'binary_crossentropy'
+    optimizer = 'adam'
+    metrics = ['accuracy']
+    activation_fnn = 'relu'
+    activation_rnn = 'sigmoid'
+    recurrent_activation_rnn = 'tanh'
+    output_activation = 'sigmoid'
+    epochs = 1
+
     # Create the model and add common layer for both feedforward and recurrent network
     model = keras.Sequential()
-    model.add(keras.layers.Embedding(
-        input_dim=data["vocab_size"], output_dim=128, input_length=data["x_train"].shape[1]))
+    model.add(keras.layers.Embedding(input_dim=data["vocab_size"], output_dim=hidden_dim, input_length=data["x_train"].shape[1]))
 
     # Build the model given model_type
     if model_type == "feedforward":
         # Flatten the output of the embedding layer to feed it into the dense layers
         model.add(keras.layers.Flatten())
         # Using only dense layers for feedforward network
-        model.add(keras.layers.Dense(units=64, activation='relu'))
-        model.add(keras.layers.Dense(units=64, activation='relu'))
-        model.add(keras.layers.Dense(units=16, activation='relu'))
+        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_fnn))
+        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_fnn))
     elif model_type == "recurrent":
         # Using LSTM layer for recurrent network
         model.add(keras.layers.LSTM(
-            units=64, activation='sigmoid', recurrent_activation='tanh', dropout=0.2))
-        model.add(keras.layers.Dense(units=16, activation='relu'))
+            units=hidden_dim, activation=activation_rnn, recurrent_activation=recurrent_activation_rnn, dropout=0.2))
+        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_rnn))
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
     # Defining the output layer
     # Using sigmoid activation function for both feedforward and recurrent network
     # This is due to the fact that the output is binary
-    model.add(keras.layers.Dense(units=1, activation='sigmoid'))
+    model.add(keras.layers.Dense(units=output_dim, activation=output_activation))
 
     # Choosing hyperparameters that optimizes the model for binary classification
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     # Train the model on train data
-    model.fit(data["x_train"], data["y_train"], epochs=1, verbose=1)
+    model.fit(data["x_train"], data["y_train"], epochs=epochs)
 
     # Evaluate the models accuracy on test data
-    _, test_acc = model.evaluate(data["x_test"], data["y_test"], verbose=1)
+    _, test_acc = model.evaluate(data["x_test"], data["y_test"])
 
     # Return the accuracy of the model on test data
     return test_acc
