@@ -47,6 +47,7 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     input_length = data["x_train"].shape[1]
     input_dim = data["vocab_size"]
     hidden_dim = 64
+    hidden_layers = 2
     output_dim = 1
     activation_fnn = 'relu'
     activation_rnn = ['sigmoid', 'relu']
@@ -56,29 +57,54 @@ def train_model(data: Dict[str, Union[List[Any], np.ndarray, int]], model_type="
     optimizer = 'adam'
     metrics = ['accuracy']
     epochs = 2
+    dropout = 0.2
 
     # Create the model and add common layer for both feedforward and recurrent network
     model = keras.Sequential()
-    model.add(keras.layers.Embedding(input_dim=input_dim, output_dim=hidden_dim, input_length=input_length))
+    model.add(
+        keras.layers.Embedding(
+            input_dim=input_dim,
+            output_dim=hidden_dim,
+            input_length=input_length
+        ))
 
     # Build the model given model_type
     if model_type == "feedforward":
         # Flatten the output of the embedding layer to feed it into the dense layers
         model.add(keras.layers.Flatten())
         # Using only dense layers for feedforward network
-        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_fnn))
-        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_fnn))
+        for _ in range(hidden_layers):
+            model.add(
+                keras.layers.Dense(
+                    units=hidden_dim,
+                    activation=activation_fnn
+                ))
     elif model_type == "recurrent":
         # Using LSTM layer for recurrent network
-        model.add(keras.layers.LSTM(units=hidden_dim, activation=activation_rnn[0], recurrent_activation=recurrent_activation_rnn))
-        model.add(keras.layers.Dense(units=hidden_dim, activation=activation_rnn[1]))
+        model.add(
+            keras.layers.LSTM(
+                units=hidden_dim,
+                activation=activation_rnn[0],
+                recurrent_activation=recurrent_activation_rnn,
+                dropout=dropout
+            ))
+        for _ in range(hidden_layers - 1):
+            model.add(
+                keras.layers.Dense(
+                    units=hidden_dim,
+                    activation=activation_rnn[1]
+                ))
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
     # Defining the output layer
     # Using sigmoid activation function for both feedforward and recurrent network
     # This is due to the fact that the output is binary
-    model.add(keras.layers.Dense(units=output_dim, activation=output_activation))
+    model.add(
+        keras.layers.Dense(
+            units=output_dim,
+            activation=output_activation
+        ))
 
     # Choosing hyperparameters that optimizes the model for binary classification
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
