@@ -154,7 +154,7 @@ def value_iteration() -> list[float]:
 
 
 def u_value(state: int, U: list[float]) -> float:
-    """Find the maximum q-value over all actions from this state """
+    """ Find the maximum q-value over all actions from this state """
     return max(q_value(state, action, U) for action in range(N_ACTIONS))
 
 
@@ -194,9 +194,7 @@ def display_utilities(utils: list[float]):
     grid = np.array(utils).reshape(4, 4)
     # Create a heatmap of the utilities using Seaborn
     sns.heatmap(grid, annot=True, fmt=".4f", cmap="YlGnBu")
-    # Add a title to the plot
     plt.title("Utilities")
-    # Show the plot
     plt.show()
 
 
@@ -229,9 +227,7 @@ def display_greedy_policy(U: list[float]):
 
     # Create a heatmap of the policy grid using Seaborn
     sns.heatmap(policy, annot=True, fmt=".0f", cmap="YlGnBu")
-    # Add a title to the plot
     plt.title("Greedy Policy")
-    # Show the plot
     plt.show()
 
 
