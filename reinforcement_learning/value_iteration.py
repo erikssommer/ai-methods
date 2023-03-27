@@ -126,6 +126,7 @@ def get_action_as_str(action: int) -> str:
 
 
 def value_iteration() -> list[float]:
+    """ Performs value iteration to find the optimal utilities of all states """
     # Initialize the utilities of all states to 0
     U = np.zeros(N_STATES)
 
@@ -153,7 +154,7 @@ def value_iteration() -> list[float]:
 
 
 def u_value(state: int, U: list[float]) -> float:
-    # Find the maximum q-value over all actions from this state
+    """Find the maximum q-value over all actions from this state """
     return max(q_value(state, action, U) for action in range(N_ACTIONS))
 
 
@@ -174,6 +175,7 @@ def q_value(state: int, action: int, U: list[float]) -> float:
 
 
 def greedy_policy(state: int, U: list[float]) -> int:
+    """ Find the best action to take in a given state """
     # Create a list to store the Q-values for each action in the current state
     q_values = []
     # Loop through all possible actions in the current state and compute their Q-values
@@ -187,55 +189,54 @@ def greedy_policy(state: int, U: list[float]) -> int:
 
 
 def display_utilities(utils: list[float]):
+    """ Displays the utilities of all states in a 4x4 grid """
     # Reshape the utilities into a 4x4 grid
     grid = np.array(utils).reshape(4, 4)
-
     # Create a heatmap of the utilities using Seaborn
     sns.heatmap(grid, annot=True, fmt=".4f", cmap="YlGnBu")
-
     # Add a title to the plot
     plt.title("Utilities")
-
     # Show the plot
     plt.show()
 
 
 def display_greedy_policy(U: list[float]):
+    """ Displays the optimal policy for the given utilities """
     # Start at the initial state
-    curr_state = 0
+    current_state = 0
     # Create a 4x4 grid to hold the optimal actions
     policy = np.zeros((4, 4))
 
     # Continue until we reach the goal state
     while True:
         # Store the current state in the policy grid
-        x, y = divmod(curr_state, 4)
+        x, y = divmod(current_state, 4)
         # Determine the best action to take in the current state
         policy[x][y] = 1
         # Determine the best action to take in the current state
-        next_action = greedy_policy(curr_state, U)
+        next_action = greedy_policy(current_state, U)
         # Get the next possible states that we could transition to
-        next_possible_states = list(get_next_states(curr_state, next_action))
+        next_possible_states = list(
+            get_next_states(current_state, next_action))
         # Choose the next state with the highest utility value
-        curr_state = next_possible_states[np.argmax(
+        current_state = next_possible_states[np.argmax(
             [U[state] for state in next_possible_states])]
 
         # If we have reached the goal state, store it in the policy grid and break out of the loop
-        if curr_state == 15:
+        if current_state == 15:
             policy[3][3] = 1
             break
 
     # Create a heatmap of the policy grid using Seaborn
     sns.heatmap(policy, annot=True, fmt=".0f", cmap="YlGnBu")
-
     # Add a title to the plot
     plt.title("Greedy Policy")
-
     # Show the plot
     plt.show()
 
 
 if __name__ == '__main__':
+    """ Run the value iteration algorithm and display the utilities and greedy policy """
     utilities = value_iteration()
     display_utilities(utilities)
     display_greedy_policy(utilities)
