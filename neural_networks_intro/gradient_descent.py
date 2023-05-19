@@ -1,4 +1,5 @@
-
+import numpy as np
+import matplotlib.pyplot as plt
 
 def f(x):
     """The function to approximate"""
@@ -34,3 +35,12 @@ if __name__ == "__main__":
     res = gradient_descent(learning_rate, epochs)
 
     print("The local minimum occurs at {:.4f}".format(res))
+
+    # Plot f(x) and the derivative
+    x = np.linspace(0, 3, 1000)
+    plt.plot(x, f(x), label="f(x)")
+    plt.plot(x, f_derivative(x), label="f'(x)")
+    plt.scatter(res, f(res), color='red', marker='o', label="Minimum")
+    plt.legend()
+    plt.show()
+
