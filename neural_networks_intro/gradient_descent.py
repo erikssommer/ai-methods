@@ -41,6 +41,11 @@ if __name__ == "__main__":
     plt.plot(x, f(x), label="f(x)")
     plt.plot(x, f_derivative(x), label="f'(x)")
     plt.scatter(res, f(res), color='red', marker='o', label="Minimum")
+    plt.title("Gradient Descent")
+    # Plot y = 0 line
+    plt.axhline(y=0, color='black', linestyle='--')
+    # Plot res as a vertical line
+    plt.axvline(x=res, color='black', linestyle='--')
     plt.legend()
     plt.show()
 
